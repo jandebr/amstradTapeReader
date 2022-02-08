@@ -1,0 +1,95 @@
+package org.maia.amstrad.io.tape.read;
+
+import java.util.List;
+import java.util.Vector;
+
+import org.maia.amstrad.io.tape.decorator.BytecodeAudioDecorator;
+import org.maia.amstrad.io.tape.decorator.TapeDecorator;
+import org.maia.amstrad.io.tape.model.Block;
+import org.maia.amstrad.io.tape.model.ByteSequence;
+import org.maia.amstrad.io.tape.model.TapeProgram;
+
+public class TapeReader {
+
+	private List<TapeReaderListener> listeners;
+
+	public TapeReader() {
+		this.listeners = new Vector<TapeReaderListener>();
+	}
+
+	public void addListener(TapeReaderListener listener) {
+		getListeners().add(listener);
+	}
+
+	public void removeListener(TapeReaderListener listener) {
+		getListeners().remove(listener);
+	}
+
+	public void read(TapeInputStream tape, TapeDecorator tapeDecorator) throws Exception {
+		tapeDecorator.atStartOfTape(tape);
+		fireStartReadingTape();
+		TapeProgram program = new TapeProgram();
+		ByteSequence programBytecodeBuffer = new ByteSequence();
+		BytecodeAudioDecorator byteCodeDecorator = new BytecodeAudioDecorator();
+		BlockReader br = new BlockReader();
+		br.addListener(tapeDecorator);
+		br.addListener(byteCodeDecorator);
+		Block block = null;
+		do {
+			block = br.findAndReadNextBlock(tape, programBytecodeBuffer);
+			if (block != null) {
+				if (!program.accept(block)) {
+					// Switch to next program
+					tapeDecorator.atEndOfFirstBlockNewProgram(tape);
+					fireEndReadingProgram(program, byteCodeDecorator);
+					program = new TapeProgram();
+					programBytecodeBuffer = new ByteSequence();
+					br.removeListener(byteCodeDecorator);
+					byteCodeDecorator = new BytecodeAudioDecorator();
+					br.addListener(byteCodeDecorator);
+				}
+				program.addBlock(block);
+				if (program.getNumberOfBlocks() == 1) {
+					fireStartReadingProgram(program);
+				}
+				fireFoundNewBlock(block);
+			}
+		} while (block != null);
+		if (program.getNumberOfBlocks() > 0) {
+			// Last program on tape
+			fireEndReadingProgram(program, byteCodeDecorator);
+		}
+		tapeDecorator.atEndOfTape(tape);
+		fireEndReadingTape();
+	}
+
+	private void fireStartReadingTape() {
+		for (TapeReaderListener listener : getListeners())
+			listener.startReadingTape();
+	}
+
+	private void fireEndReadingTape() {
+		for (TapeReaderListener listener : getListeners())
+			listener.endReadingTape();
+	}
+
+	private void fireFoundNewBlock(Block block) {
+		for (TapeReaderListener listener : getListeners())
+			listener.foundNewBlock(block);
+	}
+
+	private void fireStartReadingProgram(TapeProgram program) {
+		for (TapeReaderListener listener : getListeners())
+			listener.startReadingProgram(program);
+	}
+
+	private void fireEndReadingProgram(TapeProgram program, BytecodeAudioDecorator byteCodeDecorator) {
+		for (TapeReaderListener listener : getListeners())
+			listener.endReadingProgram(program, byteCodeDecorator);
+	}
+
+	private List<TapeReaderListener> getListeners() {
+		return listeners;
+	}
+
+}
