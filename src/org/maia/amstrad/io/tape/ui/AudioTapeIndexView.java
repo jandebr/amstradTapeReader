@@ -137,8 +137,8 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		if (!event.getValueIsAdjusting()) {
 			AudioTapeProgram program = getSelectedProgram();
 			getCodeInspectorAction().setEnabled(program != null);
-			getCodeEmulatorAction().setEnabled(program != null);
 			getClearSelectionAction().setEnabled(program != null);
+			getCodeEmulatorAction().updateLabel();
 			for (IndexSelectionListener listener : getSelectionListeners()) {
 				listener.indexSelectionUpdate(this);
 			}
@@ -147,9 +147,11 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 
 	public AudioTapeProgram getSelectedProgram() {
 		AudioTapeProgram program = null;
-		int row = getTable().getSelectedRow();
-		if (row >= 0) {
-			program = getProgramForRow(row);
+		if (getTable() != null) {
+			int row = getTable().getSelectedRow();
+			if (row >= 0) {
+				program = getProgramForRow(row);
+			}
 		}
 		return program;
 	}
@@ -210,6 +212,8 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		@Override
 		public void amstradPcTerminated(AmstradPc amstradPc) {
 			setAmstradPc(null);
+			getCodeEmulatorAction().updateLabel();
+			getCodeEmulatorAction().setEnabled(true);
 		}
 
 	}
@@ -234,6 +238,10 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		protected ProgramAction(String name, Icon icon) {
 			super(name, icon);
 			setEnabled(false);
+		}
+
+		protected void setName(String name) {
+			putValue(Action.NAME, name);
 		}
 
 		protected void setToolTipText(String text) {
@@ -261,21 +269,38 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 	private class CodeEmulatorAction extends ProgramAction {
 
 		public CodeEmulatorAction() {
-			super(UIResources.openCodeEmulatorLabel, UIResources.openCodeEmulatorIcon);
+			super(UIResources.openCodeEmulatorIcon);
+			updateLabel();
+			setEnabled(true);
+		}
+
+		public void updateLabel() {
+			if (getSelectedProgram() == null) {
+				if (getAmstradPc() == null) {
+					setName(UIResources.launchCpcEmulatorLabel);
+				} else {
+					setName(UIResources.rebootCpcEmulatorLabel);
+				}
+			} else {
+				setName(UIResources.openCodeEmulatorLabel);
+			}
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent event) {
+			setEnabled(false);
 			final AudioTapeProgram program = getSelectedProgram();
-			if (program != null) {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						AmstradPc amstradPc = getResetAmstradPc(program.getProgramName());
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					AmstradPc amstradPc = getResetAmstradPc(program != null ? program.getProgramName() : "JavaCPC");
+					if (program != null) {
 						amstradPc.getBasicRuntime().keyboardEnter(program.getSourceCode().toExternalForm());
 					}
-				}).start();
-			}
+					updateLabel();
+					setEnabled(true);
+				}
+			}).start();
 		}
 	}
 
