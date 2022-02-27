@@ -21,11 +21,15 @@ public class TapeProgram {
 	}
 
 	public boolean accept(Block block) {
+		return accept(block.getHeader());
+	}
+
+	public boolean accept(BlockHeader header) {
 		if (getNumberOfBlocks() == 0)
 			return true;
-		if (!block.getHeader().getProgramName().equals(getProgramName()))
+		if (!header.getProgramName().equals(getProgramName()))
 			return false;
-		return block.getHeader().getBlockNumber() == getLastBlock().getHeader().getBlockNumber() + 1;
+		return header.getBlockNumber() == getLastBlock().getHeader().getBlockNumber() + 1;
 	}
 
 	public void addBlock(Block block) {

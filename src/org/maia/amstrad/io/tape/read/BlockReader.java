@@ -32,8 +32,8 @@ public class BlockReader {
 		getListeners().remove(listener);
 	}
 
-	public Block findAndReadNextBlock(TapeInputStream tape, ByteSequence dataBuffer) throws Exception {
-		// Advance to start of block
+	public BlockHeader findAndReadNextBlockHeader(TapeInputStream tape) throws Exception {
+		// Advance to start of header
 		if (!seekSilence(tape))
 			return null;
 		fireAtSilenceBeforeBlock(tape);
@@ -42,10 +42,14 @@ public class BlockReader {
 		// Read header
 		fireAtStartOfBlockHeader(tape);
 		BlockHeader header = findAndReadBlockHeader(tape);
-		if (header == null)
-			return null;
-		fireAtEndOfBlockHeader(tape);
-		// Skip spacer
+		if (header != null)
+			fireAtEndOfBlockHeader(tape);
+		return header;
+	}
+
+	public Block findAndReadNextBlockData(TapeInputStream tape, BlockHeader header, ByteSequence dataBuffer)
+			throws Exception {
+		// Skip spacer between header and data
 		if (!seekSilence(tape))
 			return null;
 		fireAtSpacerBeforeBlockData(tape);

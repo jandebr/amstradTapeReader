@@ -68,7 +68,7 @@ public class AudioFileProfileLegendView extends JPanel {
 			// Label
 			x0 += 24;
 			g2.setColor(Color.WHITE);
-			String label = stype.name();
+			String label = stype.name().replace('_', ' ');
 			g2.drawString(label, x0, 20);
 			int labelWidth = g2.getFontMetrics().stringWidth(label);
 			x0 += labelWidth;

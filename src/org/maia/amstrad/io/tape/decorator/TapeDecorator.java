@@ -89,7 +89,7 @@ public class TapeDecorator extends SequenceDecorator<TapeSectionDecoration> impl
 		// no interest
 	}
 
-	public void atEndOfFirstBlockNewProgram(TapeInputStream tape) {
+	public void enteredNewProgram(TapeInputStream tape) {
 		getTapeProfile().lastSilenceSeparatesPrograms();
 	}
 

@@ -40,7 +40,7 @@ public class AudioTapeInputStream extends TapeInputStream {
 	}
 
 	public String toString() {
-		return getAudioFile() + "@" + getSamplePosition();
+		return getAudioFile().getSourceFile().getName() + "@" + getSamplePosition();
 	}
 
 	public void addListener(AudioTapeInputStreamListener listener) {

@@ -6,6 +6,7 @@ import java.util.Vector;
 import org.maia.amstrad.io.tape.decorator.BytecodeAudioDecorator;
 import org.maia.amstrad.io.tape.decorator.TapeDecorator;
 import org.maia.amstrad.io.tape.model.Block;
+import org.maia.amstrad.io.tape.model.BlockHeader;
 import org.maia.amstrad.io.tape.model.ByteSequence;
 import org.maia.amstrad.io.tape.model.TapeProgram;
 
@@ -31,16 +32,17 @@ public class TapeReader {
 		TapeProgram program = new TapeProgram();
 		ByteSequence programBytecodeBuffer = new ByteSequence();
 		BytecodeAudioDecorator byteCodeDecorator = new BytecodeAudioDecorator();
-		BlockReader br = new BlockReader();
+		final BlockReader br = new BlockReader();
 		br.addListener(tapeDecorator);
 		br.addListener(byteCodeDecorator);
-		Block block = null;
+		Block block;
 		do {
-			block = br.findAndReadNextBlock(tape, programBytecodeBuffer);
-			if (block != null) {
-				if (!program.accept(block)) {
+			block = null;
+			BlockHeader header = br.findAndReadNextBlockHeader(tape);
+			if (header != null) {
+				if (!program.accept(header)) {
 					// Switch to next program
-					tapeDecorator.atEndOfFirstBlockNewProgram(tape);
+					tapeDecorator.enteredNewProgram(tape);
 					fireEndReadingProgram(program, byteCodeDecorator);
 					program = new TapeProgram();
 					programBytecodeBuffer = new ByteSequence();
@@ -48,11 +50,14 @@ public class TapeReader {
 					byteCodeDecorator = new BytecodeAudioDecorator();
 					br.addListener(byteCodeDecorator);
 				}
-				program.addBlock(block);
-				if (program.getNumberOfBlocks() == 1) {
-					fireStartReadingProgram(program);
+				block = br.findAndReadNextBlockData(tape, header, programBytecodeBuffer);
+				if (block != null) {
+					program.addBlock(block);
+					if (program.getNumberOfBlocks() == 1) {
+						fireStartReadingProgram(program);
+					}
+					fireFoundNewBlock(block);
 				}
-				fireFoundNewBlock(block);
 			}
 		} while (block != null);
 		if (program.getNumberOfBlocks() > 0) {
