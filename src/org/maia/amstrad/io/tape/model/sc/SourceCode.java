@@ -22,14 +22,23 @@ public class SourceCode {
 	public void save(File file) throws IOException {
 		PrintWriter pw = new PrintWriter(file, "UTF-8");
 		pw.print(toString());
+		pw.println();
 		pw.close();
 	}
 
 	public String toString() {
-		StringBuilder sb = new StringBuilder(2048);
-		for (SourceCodeLine line : getLines()) {
-			sb.append(line.toString());
-			sb.append('\n');
+		return toExternalForm();
+	}
+
+	public String toExternalForm() {
+		StringBuilder sb = new StringBuilder(40 * (1 + getLines().size()));
+		for (int i = 0; i < getLines().size(); i++) {
+			if (i > 0)
+				sb.append('\n');
+			SourceCodeLine line = getLines().get(i);
+			sb.append(line.getLineNumber());
+			sb.append(' ');
+			sb.append(line.getCode());
 		}
 		return sb.toString();
 	}

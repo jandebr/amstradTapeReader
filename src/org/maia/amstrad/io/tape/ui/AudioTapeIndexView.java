@@ -23,6 +23,10 @@ import javax.swing.table.AbstractTableModel;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
+import org.maia.amstrad.jemu.AmstradFactory;
+import org.maia.amstrad.jemu.AmstradPc;
+import org.maia.amstrad.jemu.AmstradPcFrame;
+import org.maia.amstrad.jemu.AmstradPcStateAdapter;
 
 @SuppressWarnings("serial")
 public class AudioTapeIndexView extends JPanel implements ListSelectionListener {
@@ -33,9 +37,15 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 
 	private CodeInspectorAction codeInspectorAction;
 
+	private CodeEmulatorAction codeEmulatorAction;
+
 	private ClearSelectionAction clearSelectionAction;
 
 	private List<IndexSelectionListener> selectionListeners;
+
+	private AmstradPc amstradPc;
+
+	private AmstradPcFrame amstradPcFrame;
 
 	public AudioTapeIndexView(AudioTapeIndex tapeIndex) {
 		super(new BorderLayout());
@@ -62,6 +72,8 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		Box box = Box.createHorizontalBox();
 		box.add(new ProgramButton(getCodeInspectorAction()));
 		box.add(Box.createHorizontalStrut(4));
+		box.add(new ProgramButton(getCodeEmulatorAction()));
+		box.add(Box.createHorizontalStrut(4));
 		box.add(new ProgramButton(getClearSelectionAction()));
 		return box;
 	}
@@ -84,7 +96,26 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 
 	private void buildActions() {
 		this.codeInspectorAction = new CodeInspectorAction();
+		this.codeEmulatorAction = new CodeEmulatorAction();
 		this.clearSelectionAction = new ClearSelectionAction();
+	}
+
+	private synchronized AmstradPc getResetAmstradPc(String frameTitle) {
+		AmstradPc amstradPc = getAmstradPc();
+		if (amstradPc == null) {
+			amstradPc = AmstradFactory.getInstance().createAmstradPc();
+			AmstradPcFrame frame = amstradPc.displayInFrame(false);
+			setAmstradPc(amstradPc);
+			setAmstradPcFrame(frame);
+			frame.setTitle(frameTitle);
+			frame.installSimpleMenuBar();
+			amstradPc.addStateListener(new AmstradPcFollower());
+			amstradPc.start(true);
+		} else {
+			getAmstradPcFrame().setTitle(frameTitle);
+			amstradPc.reboot(true);
+		}
+		return amstradPc;
 	}
 
 	public void clearSelection() {
@@ -106,6 +137,7 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		if (!event.getValueIsAdjusting()) {
 			AudioTapeProgram program = getSelectedProgram();
 			getCodeInspectorAction().setEnabled(program != null);
+			getCodeEmulatorAction().setEnabled(program != null);
 			getClearSelectionAction().setEnabled(program != null);
 			for (IndexSelectionListener listener : getSelectionListeners()) {
 				listener.indexSelectionUpdate(this);
@@ -142,12 +174,44 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		return codeInspectorAction;
 	}
 
+	private CodeEmulatorAction getCodeEmulatorAction() {
+		return codeEmulatorAction;
+	}
+
 	private ClearSelectionAction getClearSelectionAction() {
 		return clearSelectionAction;
 	}
 
 	private List<IndexSelectionListener> getSelectionListeners() {
 		return selectionListeners;
+	}
+
+	private synchronized AmstradPc getAmstradPc() {
+		return amstradPc;
+	}
+
+	private synchronized void setAmstradPc(AmstradPc amstradPc) {
+		this.amstradPc = amstradPc;
+	}
+
+	private AmstradPcFrame getAmstradPcFrame() {
+		return amstradPcFrame;
+	}
+
+	private void setAmstradPcFrame(AmstradPcFrame amstradPcFrame) {
+		this.amstradPcFrame = amstradPcFrame;
+	}
+
+	private class AmstradPcFollower extends AmstradPcStateAdapter {
+
+		public AmstradPcFollower() {
+		}
+
+		@Override
+		public void amstradPcTerminated(AmstradPc amstradPc) {
+			setAmstradPc(null);
+		}
+
 	}
 
 	private class ProgramButton extends JButton {
@@ -188,10 +252,31 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		public void actionPerformed(ActionEvent event) {
 			AudioTapeProgram program = getSelectedProgram();
 			if (program != null) {
-				UIFactory.createCodeInspectorViewer(program).show();
+				UIFactory.createCodeInspectorViewer(program, false).show();
 			}
 		}
 
+	}
+
+	private class CodeEmulatorAction extends ProgramAction {
+
+		public CodeEmulatorAction() {
+			super(UIResources.openCodeEmulatorLabel, UIResources.openCodeEmulatorIcon);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent event) {
+			final AudioTapeProgram program = getSelectedProgram();
+			if (program != null) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						AmstradPc amstradPc = getResetAmstradPc(program.getProgramName());
+						amstradPc.getBasicRuntime().keyboardEnter(program.getSourceCode().toExternalForm());
+					}
+				}).start();
+			}
+		}
 	}
 
 	private class ClearSelectionAction extends ProgramAction {

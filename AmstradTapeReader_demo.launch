@@ -19,5 +19,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.maia.amstrad.io.tape.TapeReaderMain"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;D:/tools/JavaCPC/data/tapes/demo/tdk4a_14mins.wav&quot; &quot;D:/tools/JavaCPC/data/programs/demo/tdk4a_14mins&quot;"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="AmstradTapeReader"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024m"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024m -Djavacpc.ini=&quot;jemu/javacpc.ini&quot;"/>
 </launchConfiguration>

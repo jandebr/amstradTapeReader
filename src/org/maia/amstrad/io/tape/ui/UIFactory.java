@@ -18,53 +18,53 @@ public class UIFactory {
 	private UIFactory() {
 	}
 
-	public static Viewer createAudioFileProfileViewer(AudioFile audioFile, TapeProfile tapeProfile, int pixelsPerSecond)
-			throws IOException {
+	public static Viewer createAudioFileProfileViewer(AudioFile audioFile, TapeProfile tapeProfile,
+			int pixelsPerSecond, boolean exitOnClose) throws IOException {
 		JComponent view = createExtendedProfileView(audioFile, tapeProfile, pixelsPerSecond);
 		String title = "Tape profile of " + audioFile;
-		Viewer viewer = new Viewer(view, title);
+		Viewer viewer = new Viewer(view, title, exitOnClose);
 		viewer.build();
 		return viewer;
 	}
 
-	public static Viewer createAudioTapeIndexViewer(AudioTapeIndex tapeIndex) {
+	public static Viewer createAudioTapeIndexViewer(AudioTapeIndex tapeIndex, boolean exitOnClose) {
 		JComponent view = new AudioTapeIndexView(tapeIndex);
 		String title = "Index of " + tapeIndex.getAudioFile().getSourceFile().getName();
-		Viewer viewer = new Viewer(view, title);
+		Viewer viewer = new Viewer(view, title, exitOnClose);
 		viewer.build();
 		return viewer;
 	}
 
 	public static Viewer createAudioTapeIndexExtendedViewer(AudioTapeIndex tapeIndex, TapeProfile tapeProfile,
-			int pixelsPerSecond) throws IOException {
+			int pixelsPerSecond, boolean exitOnClose) throws IOException {
 		JComponent view = new AudioTapeIndexExtendedView(tapeIndex, createExtendedProfileView(tapeIndex.getAudioFile(),
 				tapeProfile, pixelsPerSecond));
 		String title = "Index of " + tapeIndex.getAudioFile().getSourceFile().getName();
-		Viewer viewer = new Viewer(view, title);
+		Viewer viewer = new Viewer(view, title, exitOnClose);
 		viewer.build();
 		return viewer;
 	}
 
-	public static Viewer createCodeInspectorViewer(AudioTapeProgram audioTapeProgram) {
+	public static Viewer createCodeInspectorViewer(AudioTapeProgram audioTapeProgram, boolean exitOnClose) {
 		JComponent view = new CodeInspectorView(audioTapeProgram);
 		String title = "Code inspection of " + audioTapeProgram.getProgramName();
-		Viewer viewer = new Viewer(view, title);
+		Viewer viewer = new Viewer(view, title, exitOnClose);
 		viewer.build();
 		return viewer;
 	}
 
-	public static Viewer createSourceCodeViewer(SourceCode sourceCode, String programName) {
+	public static Viewer createSourceCodeViewer(SourceCode sourceCode, String programName, boolean exitOnClose) {
 		JComponent view = new SourceCodeView(sourceCode);
 		String title = "Source code of " + programName;
-		Viewer viewer = new Viewer(view, title);
+		Viewer viewer = new Viewer(view, title, exitOnClose);
 		viewer.build();
 		return viewer;
 	}
 
-	public static Viewer createByteCodeViewer(ByteSequence byteCode, String programName) {
+	public static Viewer createByteCodeViewer(ByteSequence byteCode, String programName, boolean exitOnClose) {
 		JComponent view = new ByteCodeView(byteCode);
 		String title = "Byte code of " + programName;
-		Viewer viewer = new Viewer(view, title);
+		Viewer viewer = new Viewer(view, title, exitOnClose);
 		viewer.build();
 		return viewer;
 	}

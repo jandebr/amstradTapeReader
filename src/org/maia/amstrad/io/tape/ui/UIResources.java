@@ -16,6 +16,10 @@ public class UIResources {
 
 	public static Icon openCodeInspectorIcon = loadIcon(iconFolder + "code-trace-glass32.png");
 
+	public static String openCodeEmulatorLabel = "Emulate code";
+
+	public static Icon openCodeEmulatorIcon = loadIcon(iconFolder + "cpc32.png");
+
 	public static String clearSelectionLabel = "Clear selection";
 
 	public static Icon clearSelectionIcon = loadIcon(iconFolder + "unselect32.png");

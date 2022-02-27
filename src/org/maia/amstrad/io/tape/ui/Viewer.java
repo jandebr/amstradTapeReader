@@ -9,19 +9,18 @@ import javax.swing.JFrame;
 
 public class Viewer {
 
+	private JComponent view;
+
 	private String title;
 
-	private JComponent view;
+	private boolean exitOnClose;
 
 	private JFrame frame;
 
-	protected Viewer(String title) {
-		this(null, title);
-	}
-
-	public Viewer(JComponent view, String title) {
+	public Viewer(JComponent view, String title, boolean exitOnClose) {
 		this.view = view;
 		this.title = title;
+		this.exitOnClose = exitOnClose;
 	}
 
 	public void buildAndShow() {
@@ -35,7 +34,7 @@ public class Viewer {
 		setFrame(frame);
 		frame.getContentPane().add(getView());
 		frame.pack();
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		frame.setDefaultCloseOperation(isExitOnClose() ? JFrame.EXIT_ON_CLOSE : JFrame.DISPOSE_ON_CLOSE);
 		if (isDefaultCenteredOnScreen()) {
 			centerOnScreen();
 		}
@@ -71,16 +70,16 @@ public class Viewer {
 		return true;
 	}
 
+	public boolean isExitOnClose() {
+		return exitOnClose;
+	}
+
 	public String getTitle() {
 		return title;
 	}
 
 	public JComponent getView() {
 		return view;
-	}
-
-	protected void setView(JComponent view) {
-		this.view = view;
 	}
 
 	protected JFrame getFrame() {

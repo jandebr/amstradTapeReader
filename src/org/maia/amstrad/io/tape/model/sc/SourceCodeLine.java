@@ -2,7 +2,6 @@ package org.maia.amstrad.io.tape.model.sc;
 
 import org.maia.amstrad.io.tape.model.Marker;
 
-
 public class SourceCodeLine {
 
 	private int lineNumber;

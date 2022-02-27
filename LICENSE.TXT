@@ -1,0 +1,17 @@
+LICENSE
+=======
+
+This work is licensed under "Creative Commons Attribution-NonCommercial 4.0 International License"
+> See https://creativecommons.org/licenses/by-nc/4.0/
+
+Attribution goes to the original author of the work, Mr. Jan De Beer
+> GitHub: https://github.com/jandebr
+> LinkedIn: https://be.linkedin.com/in/jdbeer
+
+
+This work includes the "JavaCPC - Amstrad CPC emulator in JAVA", which is licensed under
+the GNU General Public License as published by the Free Software Foundation, version 3 or later
+> See jemu/gnu.txt
+
+
+All other parts of this work are for demonstration, non-commercial purposes only and not to be used in any other way

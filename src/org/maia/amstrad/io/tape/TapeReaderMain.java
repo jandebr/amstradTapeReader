@@ -19,8 +19,7 @@ public class TapeReaderMain {
 			File outputDirectory = new File(args[1]);
 			TapeReaderTask task = new TapeReaderTask(audioFile, outputDirectory);
 			task.readTape();
-			UIFactory.createAudioTapeIndexExtendedViewer(task.getTapeIndex(), task.getTapeProfile(), 20).show();
-			// UIFactory.createAudioFileProfileViewer(task.getAudioFile(), task.getTapeProfile(), 30).show();
+			UIFactory.createAudioTapeIndexExtendedViewer(task.getTapeIndex(), task.getTapeProfile(), 20, true).show();
 		}
 	}
 
