@@ -13,7 +13,7 @@ Code emulation with an integrated JavaCPC
 
 
 ## WAV file assumptions
-- Single audio channel (**mono track**)
-- The audio sample size is **16-bit**
--- stored as 2's-complement signed integers, ranging from -32768 to 32767
--- byte ordering is little-endian
+* Single audio channel (**mono track**)
+* The audio sample size is **16-bit**
+    * stored as 2's-complement signed integers, ranging from -32768 to 32767
+    * byte ordering is little-endian
