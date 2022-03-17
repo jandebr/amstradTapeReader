@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project Amstrad Tape Reader with Jar-in-Jar Loader">
+	<target name="create_run_jar">
+		<jar destfile="dist/amstradTapeReader.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
+				<attribute name="Rsrc-Main-Class" value="org.maia.amstrad.io.tape.TapeReaderMain" />
+				<attribute name="Class-Path" value="." />
+				<attribute name="Rsrc-Class-Path" value="./ resources/" />
+			</manifest>
+			<zipfileset src="dist/jar-in-jar-loader.zip" />
+			<zipfileset src="jemu/jemu.jar" />
+			<fileset dir="bin" />
+			<fileset dir=".">
+				<include name="resources/icons/*" />
+			</fileset>
+		</jar>
+	</target>
+</project>
