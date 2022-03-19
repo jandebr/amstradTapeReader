@@ -4,12 +4,12 @@
 		<jar destfile="dist/amstradTapeReader.jar">
 			<manifest>
 				<attribute name="Main-Class" value="org.maia.amstrad.io.tape.TapeReaderMain" />
-				<attribute name="Class-Path" value="." />
+				<attribute name="Class-Path" value=". resources/" />
 			</manifest>
 			<zipfileset src="lib/amstradPc/amstradPc.jar" />
 			<fileset dir="bin" />
-			<fileset dir=".">
-				<include name="resources/icons/*" />
+			<fileset dir="resources">
+				<include name="icons/*" />
 			</fileset>
 		</jar>
 	</target>
