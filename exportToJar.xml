@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create runnable Jar for project AmstradTapeReader">
+	<target name="create_run_jar">
+		<jar destfile="dist/amstradTapeReader.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.maia.amstrad.io.tape.TapeReaderMain" />
+				<attribute name="Class-Path" value="." />
+			</manifest>
+			<zipfileset src="lib/amstradPc/amstradPc.jar" />
+			<fileset dir="bin" />
+			<fileset dir=".">
+				<include name="resources/icons/*" />
+			</fileset>
+		</jar>
+	</target>
+</project>

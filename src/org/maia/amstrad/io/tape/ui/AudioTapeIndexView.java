@@ -23,10 +23,10 @@ import javax.swing.table.AbstractTableModel;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
-import org.maia.amstrad.jemu.AmstradFactory;
-import org.maia.amstrad.jemu.AmstradPc;
-import org.maia.amstrad.jemu.AmstradPcFrame;
-import org.maia.amstrad.jemu.AmstradPcStateAdapter;
+import org.maia.amstrad.pc.AmstradFactory;
+import org.maia.amstrad.pc.AmstradPc;
+import org.maia.amstrad.pc.AmstradPcFrame;
+import org.maia.amstrad.pc.AmstradPcStateAdapter;
 
 @SuppressWarnings("serial")
 public class AudioTapeIndexView extends JPanel implements ListSelectionListener {

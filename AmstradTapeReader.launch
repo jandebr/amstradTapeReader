@@ -19,5 +19,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.maia.amstrad.io.tape.TapeReaderMain"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;D:/tools/JavaCPC/tapes/demo/penguin.wav&quot; &quot;D:/tools/JavaCPC/tapes-read/demo/penguin&quot;"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="AmstradTapeReader"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024m -Djavacpc.ini=&quot;jemu/javacpc.ini&quot;"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024m -Djavacpc.ini=&quot;lib/amstradPc/javacpc.ini&quot;"/>
 </launchConfiguration>
