@@ -1,8 +1,8 @@
-package org.maia.amstrad.io.tape.decorator;
+package org.maia.amstrad.io.tape.decorate;
 
 import java.util.List;
 
-import org.maia.amstrad.io.tape.decorator.SourcecodeBytecodeDecorator.SourcecodeBytecodeDecoration;
+import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator.SourcecodeBytecodeDecoration;
 import org.maia.amstrad.io.tape.model.ByteCodeRange;
 import org.maia.amstrad.io.tape.model.sc.SourceCode;
 import org.maia.amstrad.io.tape.model.sc.SourceCodeLine;

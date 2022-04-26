@@ -13,11 +13,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
-import org.maia.amstrad.io.tape.decorator.AudioTapeBitDecorator;
-import org.maia.amstrad.io.tape.decorator.BytecodeAudioDecorator;
-import org.maia.amstrad.io.tape.decorator.BytecodeAudioDecorator.BytecodeAudioDecoration;
-import org.maia.amstrad.io.tape.decorator.SourcecodeBytecodeDecorator;
-import org.maia.amstrad.io.tape.decorator.SourcecodeBytecodeDecorator.SourcecodeBytecodeDecoration;
+import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
+import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator;
+import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator;
+import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator.BytecodeAudioDecoration;
+import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator.SourcecodeBytecodeDecoration;
 import org.maia.amstrad.io.tape.model.AudioRange;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.ByteCodeRange;

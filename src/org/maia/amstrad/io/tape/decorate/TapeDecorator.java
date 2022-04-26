@@ -1,9 +1,9 @@
-package org.maia.amstrad.io.tape.decorator;
+package org.maia.amstrad.io.tape.decorate;
 
 import java.io.IOException;
 import java.util.List;
 
-import org.maia.amstrad.io.tape.decorator.TapeDecorator.TapeSectionDecoration;
+import org.maia.amstrad.io.tape.decorate.TapeDecorator.TapeSectionDecoration;
 import org.maia.amstrad.io.tape.model.ByteSequence;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
 import org.maia.amstrad.io.tape.model.profile.TapeSection;

@@ -6,14 +6,14 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Iterator;
 
-import org.maia.amstrad.io.tape.decompile.LocomotiveBasicDecompiler;
-import org.maia.amstrad.io.tape.decorator.AudioTapeBitDecorator;
-import org.maia.amstrad.io.tape.decorator.BlockAudioDecorator;
-import org.maia.amstrad.io.tape.decorator.BlockAudioDecorator.BlockAudioDecoration;
-import org.maia.amstrad.io.tape.decorator.BytecodeAudioDecorator;
-import org.maia.amstrad.io.tape.decorator.SourcecodeBytecodeDecorator;
-import org.maia.amstrad.io.tape.decorator.TapeDecorator;
-import org.maia.amstrad.io.tape.decorator.TapeDecorator.TapeSectionDecoration;
+import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
+import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator;
+import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator;
+import org.maia.amstrad.io.tape.decorate.DecoratingLocomotiveBasicDecompiler;
+import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator;
+import org.maia.amstrad.io.tape.decorate.TapeDecorator;
+import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator.BlockAudioDecoration;
+import org.maia.amstrad.io.tape.decorate.TapeDecorator.TapeSectionDecoration;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.Block;
@@ -112,8 +112,9 @@ public class TapeReaderTask implements TapeReaderListener {
 		System.out.println();
 		// Decompile
 		ByteSequence byteCode = program.getByteCode();
-		LocomotiveBasicDecompiler decompiler = new LocomotiveBasicDecompiler();
-		SourceCode sourceCode = decompiler.decompile(byteCode.getBytesArray());
+		DecoratingLocomotiveBasicDecompiler decompiler = new DecoratingLocomotiveBasicDecompiler();
+		decompiler.decompile(byteCode.getBytesArray());
+		SourceCode sourceCode = decompiler.getSourceCode();
 		SourcecodeBytecodeDecorator sourceCodeDecorator = decompiler.getSourceCodeDecorator();
 		// Assemble
 		TapeProfile profileOnTape = getProfileOnTape(program);

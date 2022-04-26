@@ -1,8 +1,5 @@
 package org.maia.amstrad.io.tape.model;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,24 +17,27 @@ public class ByteSequence {
 	}
 
 	public void save(File file) throws IOException {
-		DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
+		FileOutputStream out = new FileOutputStream(file);
 		for (Short bite : getBytes()) {
-			out.writeShort(bite.intValue());
+			out.write(bite.intValue());
 		}
 		out.close();
 	}
 
 	public static ByteSequence load(File file) throws IOException {
-		DataInputStream in = new DataInputStream(new FileInputStream(file));
 		ByteSequence bytes = new ByteSequence();
-		boolean eof = false;
-		do {
-			try {
-				bytes.addByte(in.readShort());
-			} catch (EOFException e) {
-				eof = true;
+		FileInputStream in = new FileInputStream(file);
+		byte[] buffer = new byte[2048];
+		int bytesRead = in.read(buffer);
+		while (bytesRead >= 0) {
+			for (int i = 0; i < bytesRead; i++) {
+				short s = (short) buffer[i];
+				if (s < 0)
+					s += 256;
+				bytes.addByte(s);
 			}
-		} while (!eof);
+			bytesRead = in.read(buffer);
+		}
 		in.close();
 		return bytes;
 	}
@@ -142,6 +142,20 @@ public class ByteSequence {
 		ByteSequence sub = new ByteSequence();
 		sub.addBytes(getBytes().subList(fromIndex, toIndex));
 		return sub;
+	}
+
+	public int findSubSequence(ByteSequence subSequence) {
+		short[] ba = getBytesArray();
+		short[] sa = subSequence.getBytesArray();
+		for (int i = 0; i <= ba.length - sa.length; i++) {
+			for (int j = 0; j <= sa.length; j++) {
+				if (j == sa.length)
+					return i;
+				if (ba[i + j] != sa[j])
+					break;
+			}
+		}
+		return -1;
 	}
 
 	public int getLength() {

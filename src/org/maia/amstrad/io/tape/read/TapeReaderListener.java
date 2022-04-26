@@ -1,6 +1,6 @@
 package org.maia.amstrad.io.tape.read;
 
-import org.maia.amstrad.io.tape.decorator.BytecodeAudioDecorator;
+import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator;
 import org.maia.amstrad.io.tape.model.Block;
 import org.maia.amstrad.io.tape.model.TapeProgram;
 

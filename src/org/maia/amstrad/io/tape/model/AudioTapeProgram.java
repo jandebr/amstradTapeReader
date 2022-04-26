@@ -1,8 +1,8 @@
 package org.maia.amstrad.io.tape.model;
 
-import org.maia.amstrad.io.tape.decorator.AudioTapeBitDecorator;
-import org.maia.amstrad.io.tape.decorator.BytecodeAudioDecorator;
-import org.maia.amstrad.io.tape.decorator.SourcecodeBytecodeDecorator;
+import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
+import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator;
+import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
 import org.maia.amstrad.io.tape.model.sc.SourceCode;
 import org.maia.amstrad.io.tape.read.AudioFile;

@@ -1,4 +1,4 @@
-package org.maia.amstrad.io.tape.decorator;
+package org.maia.amstrad.io.tape.decorate;
 
 import java.util.Arrays;
 import java.util.Collections;

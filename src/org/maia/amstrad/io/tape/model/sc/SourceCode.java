@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 public class SourceCode {
@@ -17,6 +18,25 @@ public class SourceCode {
 	public SourceCode() {
 		this.lines = new Vector<SourceCodeLine>(1000);
 		this.linesIndex = new HashMap<Integer, SourceCodeLine>(1000);
+	}
+
+	public static SourceCode parseFromExternalForm(CharSequence externalForm) {
+		SourceCode sourceCode = new SourceCode();
+		StringTokenizer st = new StringTokenizer(externalForm.toString(), "\r\n");
+		while (st.hasMoreTokens()) {
+			String line = st.nextToken();
+			int i = line.indexOf(' ');
+			if (i >= 0) {
+				try {
+					int lineNumber = Integer.parseInt(line.substring(0, i));
+					CharSequence lineCode = line.subSequence(i + 1, line.length());
+					sourceCode.addLine(new SourceCodeLine(lineNumber, lineCode));
+				} catch (NumberFormatException e) {
+					System.err.println("Failed to parse line number: " + e);
+				}
+			}
+		}
+		return sourceCode;
 	}
 
 	public void save(File file) throws IOException {

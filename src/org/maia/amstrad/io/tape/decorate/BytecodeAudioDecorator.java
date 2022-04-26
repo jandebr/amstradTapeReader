@@ -1,9 +1,9 @@
-package org.maia.amstrad.io.tape.decorator;
+package org.maia.amstrad.io.tape.decorate;
 
 import java.util.Iterator;
 import java.util.List;
 
-import org.maia.amstrad.io.tape.decorator.BytecodeAudioDecorator.BytecodeAudioDecoration;
+import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator.BytecodeAudioDecoration;
 import org.maia.amstrad.io.tape.model.ByteSequence;
 import org.maia.amstrad.io.tape.read.BlockReaderListener;
 import org.maia.amstrad.io.tape.read.TapeInputStream;

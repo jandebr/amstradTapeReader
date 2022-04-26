@@ -1,4 +1,4 @@
-package org.maia.amstrad.io.tape.decorator;
+package org.maia.amstrad.io.tape.decorate;
 
 public abstract class SequenceDecoration implements Decoration {
 

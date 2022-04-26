@@ -1,8 +1,8 @@
-package org.maia.amstrad.io.tape.decorator;
+package org.maia.amstrad.io.tape.decorate;
 
 import java.util.List;
 
-import org.maia.amstrad.io.tape.decorator.BlockAudioDecorator.BlockAudioDecoration;
+import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator.BlockAudioDecoration;
 import org.maia.amstrad.io.tape.model.Block;
 import org.maia.amstrad.io.tape.model.TapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;

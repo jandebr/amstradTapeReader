@@ -1,8 +1,8 @@
-package org.maia.amstrad.io.tape.decorator;
+package org.maia.amstrad.io.tape.decorate;
 
 import java.util.List;
 
-import org.maia.amstrad.io.tape.decorator.AudioTapeBitDecorator.AudioTapeBitDecoration;
+import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator.AudioTapeBitDecoration;
 import org.maia.amstrad.io.tape.model.Bit;
 import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioTapeInputStream;
