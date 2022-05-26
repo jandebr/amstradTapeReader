@@ -96,10 +96,10 @@ public class BlockReader {
 		// Find cue
 		if (!findAndReadMatchingBit(Bit.ZERO, tape))
 			return null;
-		Short bite = tape.nextByte();
+		Byte bite = tape.nextByte();
 		if (bite == null)
 			return null;
-		if (bite.shortValue() != 44)
+		if ((bite.byteValue() & 0xff) != 44)
 			System.err.println("Expected block header cue byte 44 but read " + bite);
 		// Read program name
 		System.out.println("\tStart reading block header: " + tape);
@@ -107,7 +107,7 @@ public class BlockReader {
 		for (int i = 0; i < 16; i++) {
 			bite = tape.nextByte();
 			if (bite != null) {
-				short a = bite.shortValue();
+				int a = bite.byteValue() & 0xff;
 				if (a > 0)
 					programName.append((char) a);
 			}
@@ -118,7 +118,7 @@ public class BlockReader {
 		bite = tape.nextByte();
 		if (bite == null)
 			return null;
-		int blockNumber = bite.shortValue();
+		int blockNumber = bite.byteValue() & 0xff;
 		System.out.println("\tEnd reading block header: " + tape);
 		return new BlockHeader(programName.toString(), blockNumber);
 	}
@@ -127,10 +127,10 @@ public class BlockReader {
 		// Find cue
 		if (!findAndReadMatchingBit(Bit.ZERO, tape))
 			return false;
-		Short bite = tape.nextByte();
+		Byte bite = tape.nextByte();
 		if (bite == null)
 			return false;
-		if (bite.shortValue() != 22)
+		if ((bite.byteValue() & 0xff) != 22)
 			System.err.println("Expected block payload cue byte 22 but read " + bite);
 		// Read payload
 		ByteSequence blockData = new ByteSequence();

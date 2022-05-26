@@ -10,17 +10,15 @@ import java.util.Vector;
 
 public class ByteSequence {
 
-	private List<Short> bytes;
+	private List<Byte> bytes;
 
 	public ByteSequence() {
-		this.bytes = new Vector<Short>(2048);
+		this.bytes = new Vector<Byte>(2048);
 	}
 
 	public void save(File file) throws IOException {
 		FileOutputStream out = new FileOutputStream(file);
-		for (Short bite : getBytes()) {
-			out.write(bite.intValue());
-		}
+		out.write(getBytesArray());
 		out.close();
 	}
 
@@ -31,10 +29,7 @@ public class ByteSequence {
 		int bytesRead = in.read(buffer);
 		while (bytesRead >= 0) {
 			for (int i = 0; i < bytesRead; i++) {
-				short s = (short) buffer[i];
-				if (s < 0)
-					s += 256;
-				bytes.addByte(s);
+				bytes.addByte(buffer[i]);
 			}
 			bytesRead = in.read(buffer);
 		}
@@ -81,7 +76,7 @@ public class ByteSequence {
 		int moff = -1;
 		int mlen = 0;
 		for (int i = 0; i < getLength(); i++) {
-			short b = getBytes().get(i).shortValue();
+			int b = getBytes().get(i).byteValue() & 0xff;
 			String bs;
 			if (b < 32 || b > 126) {
 				bs = "[" + b + "]";
@@ -117,11 +112,21 @@ public class ByteSequence {
 		return page.toString();
 	}
 
-	public void addByte(Short bite) {
+	public void addByte(byte bite) {
+		addByte(Byte.valueOf(bite));
+	}
+
+	public void addByte(Byte bite) {
 		getBytes().add(bite);
 	}
 
-	public void addBytes(List<Short> bytes) {
+	public void addBytes(byte[] bytes) {
+		for (int i = 0; i < bytes.length; i++) {
+			addByte(bytes[i]);
+		}
+	}
+
+	public void addBytes(List<Byte> bytes) {
 		getBytes().addAll(bytes);
 	}
 
@@ -134,7 +139,7 @@ public class ByteSequence {
 			throw new IllegalArgumentException("Cannot truncate beyond the end of this sequence: " + length + " > "
 					+ getLength());
 		else if (length < getLength()) {
-			this.bytes = new Vector<Short>(getBytes().subList(0, length));
+			this.bytes = new Vector<Byte>(getBytes().subList(0, length));
 		}
 	}
 
@@ -145,8 +150,8 @@ public class ByteSequence {
 	}
 
 	public int findSubSequence(ByteSequence subSequence) {
-		short[] ba = getBytesArray();
-		short[] sa = subSequence.getBytesArray();
+		byte[] ba = getBytesArray();
+		byte[] sa = subSequence.getBytesArray();
 		for (int i = 0; i <= ba.length - sa.length; i++) {
 			for (int j = 0; j <= sa.length; j++) {
 				if (j == sa.length)
@@ -162,15 +167,15 @@ public class ByteSequence {
 		return getBytes().size();
 	}
 
-	public short[] getBytesArray() {
-		short[] array = new short[getLength()];
+	public byte[] getBytesArray() {
+		byte[] array = new byte[getLength()];
 		for (int i = 0; i < array.length; i++) {
 			array[i] = getBytes().get(i);
 		}
 		return array;
 	}
 
-	public List<Short> getBytes() {
+	public List<Byte> getBytes() {
 		return bytes;
 	}
 

@@ -8,10 +8,10 @@ public abstract class TapeInputStream {
 
 	public abstract Bit nextBit() throws IOException;
 
-	public Short nextByte() throws IOException {
-		Short bite = null;
-		short b = 0;
-		short v = 128;
+	public Byte nextByte() throws IOException {
+		Byte bite = null;
+		int b = 0;
+		int v = 128;
 		Bit bit = null;
 		while (v != 0 && (bit = nextBit()) != null) {
 			if (Bit.ONE.equals(bit))
@@ -19,17 +19,17 @@ public abstract class TapeInputStream {
 			v /= 2;
 		}
 		if (v == 0)
-			bite = Short.valueOf(b);
+			bite = (byte) b;
 		return bite;
 	}
 
 	public Integer nextWord() throws IOException {
 		Integer word = null;
-		Short b1 = nextByte();
+		Byte b1 = nextByte();
 		if (b1 != null) {
-			Short b2 = nextByte();
+			Byte b2 = nextByte();
 			if (b2 != null) {
-				word = b1.shortValue() + 256 * b2.shortValue();
+				word = (b1.byteValue() & 0xff) | ((b2.byteValue() << 8) & 0xff00);
 			}
 		}
 		return word;

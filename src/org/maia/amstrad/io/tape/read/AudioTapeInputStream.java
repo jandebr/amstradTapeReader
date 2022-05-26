@@ -103,9 +103,9 @@ public class AudioTapeInputStream extends TapeInputStream {
 	}
 
 	@Override
-	public final Short nextByte() throws IOException {
+	public final Byte nextByte() throws IOException {
 		memorizeState();
-		Short bite = super.nextByte();
+		Byte bite = super.nextByte();
 		if (bite == null) {
 			// no byte remaining, restore original state
 			restoreMemorizedState();

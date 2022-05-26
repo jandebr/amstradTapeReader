@@ -17,7 +17,7 @@ public class DecoratingLocomotiveBasicDecompiler extends LocomotiveBasicDecompil
 	}
 
 	@Override
-	protected void init(short[] byteCode) {
+	protected void init(byte[] byteCode) {
 		super.init(byteCode);
 		this.sourceCode = new SourceCode();
 		this.sourceCodeDecorator = new SourcecodeBytecodeDecorator();
