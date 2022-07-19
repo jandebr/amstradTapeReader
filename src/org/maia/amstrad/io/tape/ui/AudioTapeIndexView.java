@@ -27,6 +27,7 @@ import org.maia.amstrad.pc.AmstradFactory;
 import org.maia.amstrad.pc.AmstradPc;
 import org.maia.amstrad.pc.AmstradPcFrame;
 import org.maia.amstrad.pc.AmstradPcStateAdapter;
+import org.maia.amstrad.pc.basic.BasicCompilationException;
 
 @SuppressWarnings("serial")
 public class AudioTapeIndexView extends JPanel implements ListSelectionListener {
@@ -295,7 +296,12 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 				public void run() {
 					AmstradPc amstradPc = getResetAmstradPc(program != null ? program.getProgramName() : "JavaCPC");
 					if (program != null) {
-						amstradPc.getBasicRuntime().keyboardEnter(program.getSourceCode().toExternalForm());
+						CharSequence sourceCode = program.getSourceCode().toExternalForm();
+						try {
+							amstradPc.getBasicRuntime().loadSourceCode(sourceCode);
+						} catch (BasicCompilationException e) {
+							System.err.println(e);
+						}
 					}
 					updateLabel();
 					setEnabled(true);

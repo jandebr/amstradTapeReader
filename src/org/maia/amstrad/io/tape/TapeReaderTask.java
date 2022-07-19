@@ -8,11 +8,11 @@ import java.util.Iterator;
 
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator;
+import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator.BlockAudioDecoration;
 import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator;
 import org.maia.amstrad.io.tape.decorate.DecoratingLocomotiveBasicDecompiler;
 import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator;
 import org.maia.amstrad.io.tape.decorate.TapeDecorator;
-import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator.BlockAudioDecoration;
 import org.maia.amstrad.io.tape.decorate.TapeDecorator.TapeSectionDecoration;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
@@ -26,6 +26,7 @@ import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioTapeInputStream;
 import org.maia.amstrad.io.tape.read.TapeReader;
 import org.maia.amstrad.io.tape.read.TapeReaderListener;
+import org.maia.amstrad.pc.basic.BasicDecompilationException;
 
 /**
  * Task that reconstructs programs from an Amstrad audio tape file
@@ -113,21 +114,25 @@ public class TapeReaderTask implements TapeReaderListener {
 		// Decompile
 		ByteSequence byteCode = program.getByteCode();
 		DecoratingLocomotiveBasicDecompiler decompiler = new DecoratingLocomotiveBasicDecompiler();
-		decompiler.decompile(byteCode.getBytesArray());
-		SourceCode sourceCode = decompiler.getSourceCode();
-		SourcecodeBytecodeDecorator sourceCodeDecorator = decompiler.getSourceCodeDecorator();
-		// Assemble
-		TapeProfile profileOnTape = getProfileOnTape(program);
-		AudioTapeProgram audioTapeProgram = AudioTapeProgram.createFrom(program, sourceCode, sourceCodeDecorator,
-				byteCodeDecorator, getAudioFile(), getAudioTapeBitDecorator(), profileOnTape);
-		// Add program to index
-		int i = getTapeIndex().size();
-		getTapeIndex().addProgram(audioTapeProgram);
-		// Save program artefacts
-		File programFolder = createProgramFolder(i);
-		saveProgramName(audioTapeProgram, programFolder);
-		saveByteCode(audioTapeProgram, programFolder);
-		saveSourceCode(audioTapeProgram, programFolder);
+		try {
+			decompiler.decompile(byteCode.getBytesArray());
+			SourceCode sourceCode = decompiler.getSourceCode();
+			SourcecodeBytecodeDecorator sourceCodeDecorator = decompiler.getSourceCodeDecorator();
+			// Assemble
+			TapeProfile profileOnTape = getProfileOnTape(program);
+			AudioTapeProgram audioTapeProgram = AudioTapeProgram.createFrom(program, sourceCode, sourceCodeDecorator,
+					byteCodeDecorator, getAudioFile(), getAudioTapeBitDecorator(), profileOnTape);
+			// Add program to index
+			int i = getTapeIndex().size();
+			getTapeIndex().addProgram(audioTapeProgram);
+			// Save program artefacts
+			File programFolder = createProgramFolder(i);
+			saveProgramName(audioTapeProgram, programFolder);
+			saveByteCode(audioTapeProgram, programFolder);
+			saveSourceCode(audioTapeProgram, programFolder);
+		} catch (BasicDecompilationException e) {
+			System.err.println(e);
+		}
 	}
 
 	private TapeProfile getProfileOnTape(TapeProgram program) {

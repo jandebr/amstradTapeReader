@@ -5,7 +5,7 @@ import org.maia.amstrad.io.tape.model.sc.SourceCode;
 import org.maia.amstrad.io.tape.model.sc.SourceCodeLine;
 import org.maia.amstrad.io.tape.model.sc.SourceCodePosition;
 import org.maia.amstrad.io.tape.model.sc.SourceCodeRange;
-import org.maia.amstrad.pc.basic.LocomotiveBasicDecompiler;
+import org.maia.amstrad.pc.basic.locomotive.LocomotiveBasicDecompiler;
 
 public class DecoratingLocomotiveBasicDecompiler extends LocomotiveBasicDecompiler {
 
