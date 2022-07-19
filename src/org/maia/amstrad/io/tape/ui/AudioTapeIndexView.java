@@ -299,6 +299,7 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 						CharSequence sourceCode = program.getSourceCode().toExternalForm();
 						try {
 							amstradPc.getBasicRuntime().loadSourceCode(sourceCode);
+							amstradPc.getBasicRuntime().run();
 						} catch (BasicCompilationException e) {
 							System.err.println(e);
 						}
