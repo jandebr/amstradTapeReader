@@ -101,19 +101,17 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		this.clearSelectionAction = new ClearSelectionAction();
 	}
 
-	private synchronized AmstradPc getResetAmstradPc(String frameTitle) {
+	private synchronized AmstradPc getResetAmstradPc() {
 		AmstradPc amstradPc = getAmstradPc();
 		if (amstradPc == null) {
 			amstradPc = AmstradFactory.getInstance().createAmstradPc();
 			AmstradPcFrame frame = amstradPc.displayInFrame(false);
 			setAmstradPc(amstradPc);
 			setAmstradPcFrame(frame);
-			frame.setTitle(frameTitle);
 			frame.installSimpleMenuBar();
 			amstradPc.addStateListener(new AmstradPcFollower());
 			amstradPc.start(true);
 		} else {
-			getAmstradPcFrame().setTitle(frameTitle);
 			amstradPc.reboot(true);
 		}
 		return amstradPc;
@@ -294,16 +292,19 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-					AmstradPc amstradPc = getResetAmstradPc(program != null ? program.getProgramName() : "JavaCPC");
+					AmstradPc amstradPc = getResetAmstradPc();
+					String amstradPcFrameTitle = "JavaCPC";
 					if (program != null) {
 						CharSequence sourceCode = program.getSourceCode().toExternalForm();
 						try {
 							amstradPc.getBasicRuntime().loadSourceCode(sourceCode);
-							amstradPc.getBasicRuntime().run();
+							amstradPc.getBasicRuntime().run(false);
+							amstradPcFrameTitle = program.getProgramName();
 						} catch (BasicCompilationException e) {
 							System.err.println(e);
 						}
 					}
+					getAmstradPcFrame().setTitle(amstradPcFrameTitle);
 					updateLabel();
 					setEnabled(true);
 				}
