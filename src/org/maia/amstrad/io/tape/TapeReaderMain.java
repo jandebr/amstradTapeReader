@@ -5,6 +5,7 @@ import java.io.File;
 import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioWaveFile;
 import org.maia.amstrad.io.tape.ui.UIFactory;
+import org.maia.amstrad.pc.AmstradFactory;
 
 public class TapeReaderMain {
 
@@ -17,6 +18,7 @@ public class TapeReaderMain {
 		} else {
 			AudioFile audioFile = new AudioWaveFile(new File(args[0]));
 			File outputDirectory = new File(args[1]);
+			AmstradFactory.getInstance().getAmstradContext().setAmstradProgramRepositoryRootFolder(outputDirectory);
 			TapeReaderTask task = new TapeReaderTask(audioFile, outputDirectory);
 			task.readTape();
 			UIFactory.createAudioTapeIndexExtendedViewer(task.getTapeIndex(), task.getTapeProfile(), 20, true).show();
