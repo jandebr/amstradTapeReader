@@ -41,8 +41,7 @@ public class SourceCode {
 
 	public void save(File file) throws IOException {
 		PrintWriter pw = new PrintWriter(file, "UTF-8");
-		pw.print(toString());
-		pw.println();
+		pw.println(toString());
 		pw.close();
 	}
 

@@ -18,8 +18,11 @@ public class TapeReaderMain {
 		} else {
 			AudioFile audioFile = new AudioWaveFile(new File(args[0]));
 			File outputDirectory = new File(args[1]);
-			AmstradFactory.getInstance().getAmstradContext().setAmstradProgramRepositoryRootFolder(outputDirectory);
+			if (!outputDirectory.exists())
+				outputDirectory.mkdirs();
+			AmstradFactory.getInstance().getAmstradContext().setProgramRepositoryRootFolder(outputDirectory);
 			TapeReaderTask task = new TapeReaderTask(audioFile, outputDirectory);
+			task.setMinimalOutput(true);
 			task.readTape();
 			UIFactory.createAudioTapeIndexExtendedViewer(task.getTapeIndex(), task.getTapeProfile(), 20, true).show();
 		}

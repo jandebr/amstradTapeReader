@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Iterator;
 
+import org.maia.amstrad.io.AmstradFileType;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator.BlockAudioDecoration;
@@ -27,6 +28,7 @@ import org.maia.amstrad.io.tape.read.AudioTapeInputStream;
 import org.maia.amstrad.io.tape.read.TapeReader;
 import org.maia.amstrad.io.tape.read.TapeReaderListener;
 import org.maia.amstrad.pc.basic.BasicDecompilationException;
+import org.maia.amstrad.program.AmstradMetaDataConstants;
 
 /**
  * Task that reconstructs programs from an Amstrad audio tape file
@@ -36,7 +38,7 @@ import org.maia.amstrad.pc.basic.BasicDecompilationException;
  * inspected via {@link #getTapeIndex()} and {@link #getTapeProfile()}.
  * </p>
  */
-public class TapeReaderTask implements TapeReaderListener {
+public class TapeReaderTask implements TapeReaderListener, AmstradMetaDataConstants {
 
 	private AudioFile audioFile; // tape recording .WAV file
 
@@ -49,6 +51,8 @@ public class TapeReaderTask implements TapeReaderListener {
 	private BlockAudioDecorator blockDecorator; // locates blocks on tape
 
 	private AudioTapeBitDecorator audioTapeBitDecorator; // locates bits in the input file
+
+	private boolean minimalOutput;
 
 	private static NumberFormat programFolderNumberFormat;
 
@@ -87,8 +91,10 @@ public class TapeReaderTask implements TapeReaderListener {
 		System.out.println("End reading tape");
 		System.out.println();
 		System.out.println(getTapeProfile());
-		saveTapeProfile();
 		saveProgramIndex();
+		if (!isMinimalOutput()) {
+			saveTapeProfile();
+		}
 	}
 
 	@Override
@@ -126,10 +132,12 @@ public class TapeReaderTask implements TapeReaderListener {
 			int i = getTapeIndex().size();
 			getTapeIndex().addProgram(audioTapeProgram);
 			// Save program artefacts
-			File programFolder = createProgramFolder(i);
-			saveProgramName(audioTapeProgram, programFolder);
-			saveByteCode(audioTapeProgram, programFolder);
+			File programFolder = createProgramFolder(audioTapeProgram, i);
+			saveMetaData(audioTapeProgram, programFolder);
 			saveSourceCode(audioTapeProgram, programFolder);
+			if (!isMinimalOutput()) {
+				saveByteCode(audioTapeProgram, programFolder);
+			}
 		} catch (BasicDecompilationException e) {
 			System.err.println(e);
 		}
@@ -155,32 +163,43 @@ public class TapeReaderTask implements TapeReaderListener {
 		return profile;
 	}
 
-	private File createProgramFolder(int programIndex) {
-		File folder = getProgramFolder(programIndex);
+	private File createProgramFolder(AudioTapeProgram program, int programIndex) {
+		File folder = getProgramFolder(program, programIndex);
 		folder.mkdirs();
 		return folder;
 	}
 
-	private File getProgramFolder(int programIndex) {
-		String folderName = programFolderNumberFormat.format(programIndex + 1);
-		return new File(getOutputDirectory(), folderName);
-	}
-
-	private void saveProgramName(AudioTapeProgram program, File programFolder) {
-		try {
-			PrintWriter pw = new PrintWriter(new File(programFolder, "name.txt"), "UTF-8");
-			pw.print(program.getProgramName());
-			pw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+	private File getProgramFolder(AudioTapeProgram program, int programIndex) {
+		StringBuilder sb = new StringBuilder(20);
+		sb.append(programFolderNumberFormat.format(programIndex + 1)).append('_');
+		for (int i = 0; i < program.getProgramName().length(); i++) {
+			char c = program.getProgramName().charAt(i);
+			if (isSafeCharForProgramFolder(c))
+				sb.append(c);
 		}
+		return new File(getOutputDirectory(), sb.toString());
 	}
 
-	private void saveByteCode(AudioTapeProgram program, File programFolder) {
-		ByteSequence byteCode = program.getByteCode();
+	private boolean isSafeCharForProgramFolder(char c) {
+		return Character.isLetterOrDigit(c) || ".-_ ()".indexOf(c) >= 0;
+	}
+
+	private void saveMetaData(AudioTapeProgram program, File programFolder) {
 		try {
-			byteCode.save(new File(programFolder, "bytecode.bin"));
-			byteCode.saveAsText(new File(programFolder, "bytecode.txt"));
+			PrintWriter pw = new PrintWriter(new File(programFolder, "INFO-ATR"
+					+ AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension()), "UTF-8");
+			pw.println(AMD_TYPE + ": " + AMD_TYPE_BASIC_PROGRAM);
+			pw.println(AMD_NAME + ": " + program.getProgramName());
+			pw.println(AMD_AUTHOR + ": " + getDefaultMetaDatum(AMD_AUTHOR));
+			pw.println(AMD_YEAR + ": " + getDefaultMetaDatum(AMD_YEAR));
+			pw.println(AMD_TAPE + ": " + getDefaultMetaDatum(AMD_TAPE));
+			pw.println(AMD_BLOCKS + ": " + program.getNumberOfBlocks());
+			pw.println(AMD_MONITOR + ": " + getDefaultMetaDatum(AMD_MONITOR));
+			pw.println(AMD_DESCRIPTION + ": " + getDefaultMetaDatum(AMD_DESCRIPTION));
+			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_HEADING + ": ");
+			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_KEY + ": ");
+			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_DESCRIPTION + ": ");
+			pw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -189,7 +208,18 @@ public class TapeReaderTask implements TapeReaderListener {
 	private void saveSourceCode(AudioTapeProgram program, File programFolder) {
 		SourceCode sourceCode = program.getSourceCode();
 		try {
-			sourceCode.save(new File(programFolder, "code.bas"));
+			sourceCode
+					.save(new File(programFolder, "code" + AmstradFileType.BASIC_SOURCE_CODE_FILE.getFileExtension()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void saveByteCode(AudioTapeProgram program, File programFolder) {
+		ByteSequence byteCode = program.getByteCode();
+		try {
+			byteCode.save(new File(programFolder, "bytecode" + AmstradFileType.BASIC_BYTE_CODE_FILE.getFileExtension()));
+			byteCode.saveAsText(new File(programFolder, "bytecode.txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -208,7 +238,7 @@ public class TapeReaderTask implements TapeReaderListener {
 			PrintWriter pw = new PrintWriter(new File(getOutputDirectory(), "index.txt"), "UTF-8");
 			for (int i = 0; i < getTapeIndex().size(); i++) {
 				AudioTapeProgram program = getTapeIndex().getPrograms().get(i);
-				pw.print(getProgramFolder(i).getName());
+				pw.print(getProgramFolder(program, i).getName());
 				pw.print("\t");
 				pw.print(program.getNumberOfBlocks());
 				pw.print(" blocks\t");
@@ -218,6 +248,14 @@ public class TapeReaderTask implements TapeReaderListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private String getDefaultMetaDatum(String key) {
+		return getDefaultMetaDatum(key, "");
+	}
+
+	private String getDefaultMetaDatum(String key, String defaultValue) {
+		return System.getProperty("amd." + key.toLowerCase(), defaultValue);
 	}
 
 	public AudioFile getAudioFile() {
@@ -246,6 +284,14 @@ public class TapeReaderTask implements TapeReaderListener {
 
 	private AudioTapeBitDecorator getAudioTapeBitDecorator() {
 		return audioTapeBitDecorator;
+	}
+
+	public boolean isMinimalOutput() {
+		return minimalOutput;
+	}
+
+	public void setMinimalOutput(boolean minimalOutput) {
+		this.minimalOutput = minimalOutput;
 	}
 
 }
