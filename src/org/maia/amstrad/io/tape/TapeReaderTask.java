@@ -196,6 +196,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradMetaDataConsta
 			pw.println(AMD_BLOCKS + ": " + program.getNumberOfBlocks());
 			pw.println(AMD_MONITOR + ": " + getDefaultMetaDatum(AMD_MONITOR));
 			pw.println(AMD_DESCRIPTION + ": " + getDefaultMetaDatum(AMD_DESCRIPTION));
+			pw.println(AMD_AUTHORING + ": " + getDefaultMetaDatum(AMD_AUTHORING));
 			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_HEADING + ": ");
 			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_KEY + ": ");
 			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_DESCRIPTION + ": ");
