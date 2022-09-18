@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Iterator;
 
-import org.maia.amstrad.io.AmstradFileType;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator.BlockAudioDecoration;
@@ -27,6 +26,7 @@ import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioTapeInputStream;
 import org.maia.amstrad.io.tape.read.TapeReader;
 import org.maia.amstrad.io.tape.read.TapeReaderListener;
+import org.maia.amstrad.pc.AmstradFileType;
 import org.maia.amstrad.pc.basic.BasicDecompilationException;
 import org.maia.amstrad.program.AmstradMetaDataConstants;
 
