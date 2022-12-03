@@ -20,6 +20,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+import org.maia.amstrad.basic.BasicCompilationException;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
@@ -27,7 +28,6 @@ import org.maia.amstrad.pc.AmstradFactory;
 import org.maia.amstrad.pc.AmstradPc;
 import org.maia.amstrad.pc.AmstradPcFrame;
 import org.maia.amstrad.pc.AmstradPcStateAdapter;
-import org.maia.amstrad.pc.basic.BasicCompilationException;
 
 @SuppressWarnings("serial")
 public class AudioTapeIndexView extends JPanel implements ListSelectionListener {
@@ -298,8 +298,7 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 					if (program != null) {
 						CharSequence sourceCode = program.getSourceCode().toExternalForm();
 						try {
-							amstradPc.getBasicRuntime().loadSourceCode(sourceCode);
-							amstradPc.getBasicRuntime().run(false);
+							amstradPc.getBasicRuntime().loadSourceCode(sourceCode).run();
 							amstradPcFrameTitle = program.getProgramName();
 						} catch (BasicCompilationException e) {
 							System.err.println(e);

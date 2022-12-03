@@ -1,11 +1,11 @@
 package org.maia.amstrad.io.tape.decorate;
 
+import org.maia.amstrad.basic.locomotive.LocomotiveBasicDecompiler;
 import org.maia.amstrad.io.tape.model.ByteCodeRange;
 import org.maia.amstrad.io.tape.model.sc.SourceCode;
 import org.maia.amstrad.io.tape.model.sc.SourceCodeLine;
 import org.maia.amstrad.io.tape.model.sc.SourceCodePosition;
 import org.maia.amstrad.io.tape.model.sc.SourceCodeRange;
-import org.maia.amstrad.pc.basic.locomotive.LocomotiveBasicDecompiler;
 
 public class DecoratingLocomotiveBasicDecompiler extends LocomotiveBasicDecompiler {
 

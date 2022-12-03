@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Iterator;
 
+import org.maia.amstrad.basic.BasicDecompilationException;
+import org.maia.amstrad.io.AmstradFileType;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator.BlockAudioDecoration;
@@ -26,9 +28,7 @@ import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioTapeInputStream;
 import org.maia.amstrad.io.tape.read.TapeReader;
 import org.maia.amstrad.io.tape.read.TapeReaderListener;
-import org.maia.amstrad.pc.AmstradFileType;
-import org.maia.amstrad.pc.basic.BasicDecompilationException;
-import org.maia.amstrad.program.AmstradMetaDataConstants;
+import org.maia.amstrad.program.AmstradProgramMetaDataConstants;
 
 /**
  * Task that reconstructs programs from an Amstrad audio tape file
@@ -38,7 +38,7 @@ import org.maia.amstrad.program.AmstradMetaDataConstants;
  * inspected via {@link #getTapeIndex()} and {@link #getTapeProfile()}.
  * </p>
  */
-public class TapeReaderTask implements TapeReaderListener, AmstradMetaDataConstants {
+public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDataConstants {
 
 	private AudioFile audioFile; // tape recording .WAV file
 
@@ -186,8 +186,9 @@ public class TapeReaderTask implements TapeReaderListener, AmstradMetaDataConsta
 
 	private void saveMetaData(AudioTapeProgram program, File programFolder) {
 		try {
-			PrintWriter pw = new PrintWriter(new File(programFolder, "INFO-ATR"
-					+ AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension()), "UTF-8");
+			PrintWriter pw = new PrintWriter(
+					new File(programFolder, "INFO-ATR" + AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension()),
+					"UTF-8");
 			pw.println(AMD_TYPE + ": " + AMD_TYPE_BASIC_PROGRAM);
 			pw.println(AMD_NAME + ": " + program.getProgramName());
 			pw.println(AMD_AUTHOR + ": " + getDefaultMetaDatum(AMD_AUTHOR));
@@ -221,7 +222,8 @@ public class TapeReaderTask implements TapeReaderListener, AmstradMetaDataConsta
 	private void saveByteCode(AudioTapeProgram program, File programFolder) {
 		ByteSequence byteCode = program.getByteCode();
 		try {
-			byteCode.save(new File(programFolder, "bytecode" + AmstradFileType.BASIC_BYTE_CODE_FILE.getFileExtension()));
+			byteCode.save(
+					new File(programFolder, "bytecode" + AmstradFileType.BASIC_BYTE_CODE_FILE.getFileExtension()));
 			byteCode.saveAsText(new File(programFolder, "bytecode.txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
