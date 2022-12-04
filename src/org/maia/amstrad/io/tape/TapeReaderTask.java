@@ -232,7 +232,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 
 	private void saveTapeProfile() {
 		try {
-			getTapeProfile().save(new File(getOutputDirectory(), "tapeprofile.bin"));
+			getTapeProfile().save(new File(getOutputDirectory(), "tapeprofile.dat"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
