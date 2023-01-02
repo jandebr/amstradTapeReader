@@ -189,7 +189,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 			PrintWriter pw = new PrintWriter(
 					new File(programFolder, "INFO-ATR" + AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension()),
 					"UTF-8");
-			pw.println(AMD_TYPE + ": " + AMD_TYPE_BASIC_PROGRAM);
+			pw.println(AMD_TYPE + ": " + AMD_TYPE_LOCOMOTIVE_BASIC_PROGRAM);
 			pw.println(AMD_NAME + ": " + program.getProgramName());
 			pw.println(AMD_AUTHOR + ": " + getDefaultMetaDatum(AMD_AUTHOR));
 			pw.println(AMD_YEAR + ": " + getDefaultMetaDatum(AMD_YEAR));

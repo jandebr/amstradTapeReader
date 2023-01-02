@@ -20,11 +20,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
-import org.maia.amstrad.basic.BasicCompilationException;
+import org.maia.amstrad.AmstradFactory;
+import org.maia.amstrad.basic.BasicSyntaxException;
+import org.maia.amstrad.basic.locomotive.LocomotiveBasicRuntime;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
-import org.maia.amstrad.pc.AmstradFactory;
 import org.maia.amstrad.pc.AmstradPc;
 import org.maia.amstrad.pc.AmstradPcFrame;
 import org.maia.amstrad.pc.AmstradPcStateAdapter;
@@ -114,7 +115,7 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		} else {
 			amstradPc.reboot(true, false);
 		}
-		amstradPc.setWindowTitleDynamic(false);
+		amstradPc.getMonitor().setWindowTitleDynamic(false);
 		return amstradPc;
 	}
 
@@ -298,9 +299,13 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 					if (program != null) {
 						CharSequence sourceCode = program.getSourceCode().toExternalForm();
 						try {
-							amstradPc.getBasicRuntime().loadSourceCode(sourceCode).run();
+							LocomotiveBasicRuntime rt = (LocomotiveBasicRuntime) amstradPc.getBasicRuntime();
+							rt.loadSourceCode(sourceCode);
+							rt.run();
 							amstradPcFrameTitle = program.getProgramName();
-						} catch (BasicCompilationException e) {
+						} catch (ClassCastException e) {
+							System.err.println(e);
+						} catch (BasicSyntaxException e) {
 							System.err.println(e);
 						}
 					}
