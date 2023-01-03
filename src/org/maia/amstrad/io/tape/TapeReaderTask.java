@@ -6,7 +6,8 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Iterator;
 
-import org.maia.amstrad.basic.BasicDecompilationException;
+import org.maia.amstrad.basic.BasicException;
+import org.maia.amstrad.basic.locomotive.LocomotiveBasicByteCode;
 import org.maia.amstrad.io.AmstradFileType;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator;
@@ -121,7 +122,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 		ByteSequence byteCode = program.getByteCode();
 		DecoratingLocomotiveBasicDecompiler decompiler = new DecoratingLocomotiveBasicDecompiler();
 		try {
-			decompiler.decompile(byteCode.getBytesArray());
+			decompiler.decompile(new LocomotiveBasicByteCode(byteCode.getBytesArray()));
 			SourceCode sourceCode = decompiler.getSourceCode();
 			SourcecodeBytecodeDecorator sourceCodeDecorator = decompiler.getSourceCodeDecorator();
 			// Assemble
@@ -138,7 +139,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 			if (!isMinimalOutput()) {
 				saveByteCode(audioTapeProgram, programFolder);
 			}
-		} catch (BasicDecompilationException e) {
+		} catch (BasicException e) {
 			System.err.println(e);
 		}
 	}

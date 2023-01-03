@@ -1,5 +1,6 @@
 package org.maia.amstrad.io.tape.decorate;
 
+import org.maia.amstrad.basic.BasicByteCode;
 import org.maia.amstrad.basic.locomotive.LocomotiveBasicDecompiler;
 import org.maia.amstrad.io.tape.model.ByteCodeRange;
 import org.maia.amstrad.io.tape.model.sc.SourceCode;
@@ -17,7 +18,7 @@ public class DecoratingLocomotiveBasicDecompiler extends LocomotiveBasicDecompil
 	}
 
 	@Override
-	protected void init(byte[] byteCode) {
+	protected void init(BasicByteCode byteCode) {
 		super.init(byteCode);
 		this.sourceCode = new SourceCode();
 		this.sourceCodeDecorator = new SourcecodeBytecodeDecorator();

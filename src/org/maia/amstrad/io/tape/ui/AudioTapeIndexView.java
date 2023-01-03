@@ -21,8 +21,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 import org.maia.amstrad.AmstradFactory;
-import org.maia.amstrad.basic.BasicSyntaxException;
-import org.maia.amstrad.basic.locomotive.LocomotiveBasicRuntime;
+import org.maia.amstrad.basic.BasicException;
+import org.maia.amstrad.basic.locomotive.LocomotiveBasicSourceCode;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
@@ -299,13 +299,11 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 					if (program != null) {
 						CharSequence sourceCode = program.getSourceCode().toExternalForm();
 						try {
-							LocomotiveBasicRuntime rt = (LocomotiveBasicRuntime) amstradPc.getBasicRuntime();
-							rt.loadSourceCode(sourceCode);
-							rt.run();
+							amstradPc.getBasicRuntime().run(new LocomotiveBasicSourceCode(sourceCode));
 							amstradPcFrameTitle = program.getProgramName();
 						} catch (ClassCastException e) {
 							System.err.println(e);
-						} catch (BasicSyntaxException e) {
+						} catch (BasicException e) {
 							System.err.println(e);
 						}
 					}
