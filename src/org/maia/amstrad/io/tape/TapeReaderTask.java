@@ -6,9 +6,9 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Iterator;
 
+import org.maia.amstrad.AmstradFileType;
 import org.maia.amstrad.basic.BasicException;
 import org.maia.amstrad.basic.locomotive.LocomotiveBasicByteCode;
-import org.maia.amstrad.io.AmstradFileType;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator.BlockAudioDecoration;
