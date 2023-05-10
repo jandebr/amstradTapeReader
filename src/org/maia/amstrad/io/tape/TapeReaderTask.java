@@ -204,6 +204,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_DESCRIPTION + ": ");
 			pw.println("#" + AMD_IMAGES_PREFIX + "[1]" + AMD_IMAGES_SUFFIX_FILEREF + ": ");
 			pw.println("#" + AMD_IMAGES_PREFIX + "[1]" + AMD_IMAGES_SUFFIX_CAPTION + ": ");
+			pw.println("#" + AMD_COVER_IMAGE + ": ");
 			pw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
