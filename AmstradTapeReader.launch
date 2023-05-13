@@ -22,7 +22,7 @@
     <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.maia.amstrad.io.tape.TapeReaderMain"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="AmstradTapeReader"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;D:/Schneider CPC464 Restore/maxell-geel-B.restore.wav&quot; &quot;D:/Schneider CPC464 Restore/maxell-geel-B&quot;"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;D:/Users/jan/Schneider CPC464/Restore/penguin.wav&quot; &quot;D:/Users/jan/Schneider CPC464/Restore/penguin&quot;"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="AmstradTapeReader"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024m -Djavacpc-ini-read=&quot;javacpc.ini&quot; -Damd.author=&quot;Bart De Beer&quot; -Damd.tape=&quot;MAXELL geel (B)&quot; -Damd.monitor=&quot;GREEN&quot;"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx1024m -Djavacpc-ini-read=&quot;javacpc.ini&quot; -Damd.author=&quot;Bart De Beer&quot; -Damd.tape=&quot;MAXELL-Y (B)&quot; -Damd.monitor=&quot;GREEN&quot;"/>
 </launchConfiguration>
