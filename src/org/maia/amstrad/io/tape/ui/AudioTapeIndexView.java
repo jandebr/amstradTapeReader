@@ -115,7 +115,6 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		} else {
 			amstradPc.reboot(true, false);
 		}
-		amstradPc.getMonitor().setWindowTitleDynamic(false);
 		return amstradPc;
 	}
 
