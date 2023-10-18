@@ -148,9 +148,9 @@ public class AudioTapeOutputStream extends TapeOutputStream {
 	private void writeHeaderValue(RandomAccessFile raf, int offset, int value) throws IOException {
 		raf.seek(offset);
 		raf.write(value & 0xff);
-		raf.write((value & 0xff00) >> 8);
-		raf.write((value & 0xff0000) >> 16);
-		raf.write((value & 0xff000000) >> 24);
+		raf.write((value & 0xff00) >>> 8);
+		raf.write((value & 0xff0000) >>> 16);
+		raf.write((value & 0xff000000) >>> 24);
 	}
 
 	public File getAudioFile() {
