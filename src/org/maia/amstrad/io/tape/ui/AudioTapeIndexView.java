@@ -2,6 +2,8 @@ package org.maia.amstrad.io.tape.ui;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.Vector;
 
@@ -12,8 +14,10 @@ import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -28,7 +32,9 @@ import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
 import org.maia.amstrad.pc.AmstradPc;
 import org.maia.amstrad.pc.AmstradPcFrame;
-import org.maia.amstrad.pc.AmstradPcStateAdapter;
+import org.maia.amstrad.pc.menu.AmstradMenuBar;
+import org.maia.amstrad.pc.menu.maker.AmstradMenuBarMaker;
+import org.maia.amstrad.pc.menu.maker.AmstradMenuDefaultLookAndFeel;
 
 @SuppressWarnings("serial")
 public class AudioTapeIndexView extends JPanel implements ListSelectionListener {
@@ -107,10 +113,10 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		if (amstradPc == null) {
 			amstradPc = AmstradFactory.getInstance().createAmstradPc();
 			AmstradPcFrame frame = amstradPc.displayInFrame(false);
+			frame.addWindowListener(new AmstradPcTerminator());
 			setAmstradPc(amstradPc);
 			setAmstradPcFrame(frame);
-			frame.installAndEnableMenuBar();
-			amstradPc.addStateListener(new AmstradPcFollower());
+			new AmstradMenuBarMakerImpl().createMenuBar().install();
 			amstradPc.start(true, false);
 		} else {
 			amstradPc.reboot(true, false);
@@ -204,16 +210,20 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		this.amstradPcFrame = amstradPcFrame;
 	}
 
-	private class AmstradPcFollower extends AmstradPcStateAdapter {
+	private class AmstradPcTerminator extends WindowAdapter {
 
-		public AmstradPcFollower() {
+		public AmstradPcTerminator() {
 		}
 
 		@Override
-		public void amstradPcTerminated(AmstradPc amstradPc) {
-			setAmstradPc(null);
-			getCodeEmulatorAction().updateLabel();
-			getCodeEmulatorAction().setEnabled(true);
+		public void windowClosed(WindowEvent e) {
+			AmstradPc amstradPc = getAmstradPc();
+			if (amstradPc != null) {
+				amstradPc.terminate();
+				setAmstradPc(null);
+				getCodeEmulatorAction().updateLabel();
+				getCodeEmulatorAction().setEnabled(true);
+			}
 		}
 
 	}
@@ -407,6 +417,40 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 	public static interface IndexSelectionListener {
 
 		void indexSelectionUpdate(AudioTapeIndexView source);
+
+	}
+
+	private class AmstradMenuBarMakerImpl extends AmstradMenuBarMaker {
+
+		public AmstradMenuBarMakerImpl() {
+			super(AudioTapeIndexView.this.getAmstradPc(), new AmstradMenuDefaultLookAndFeel());
+		}
+
+		@Override
+		protected AmstradMenuBar doCreateMenu() {
+			AmstradMenuBar menuBar = new AmstradMenuBar(getAmstradPc());
+			menuBar.add(createRestrictedFileMenu());
+			menuBar.add(createEmulatorMenu());
+			menuBar.add(createMonitorMenu());
+			menuBar.add(createWindowMenu());
+			return updateMenuBarLookAndFeel(menuBar);
+		}
+
+		protected JMenu createRestrictedFileMenu() {
+			JMenu menu = new JMenu("File");
+			// setting up program browser (already done)
+			menu.add(createProgramBrowserMenuItem());
+			menu.add(new JSeparator());
+			menu.add(createLoadBasicSourceFileMenuItem());
+			menu.add(createLoadBasicBinaryFileMenuItem());
+			menu.add(createLoadSnapshotFileMenuItem());
+			menu.add(new JSeparator());
+			menu.add(createSaveBasicSourceFileMenuItem());
+			menu.add(createSaveBasicBinaryFileMenuItem());
+			menu.add(createSaveSnapshotFileMenuItem());
+			// no poweroff
+			return updateMenuLookAndFeel(menu);
+		}
 
 	}
 
