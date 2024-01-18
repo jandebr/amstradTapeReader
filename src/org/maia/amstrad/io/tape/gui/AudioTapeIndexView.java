@@ -1,4 +1,4 @@
-package org.maia.amstrad.io.tape.ui;
+package org.maia.amstrad.io.tape.gui;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;

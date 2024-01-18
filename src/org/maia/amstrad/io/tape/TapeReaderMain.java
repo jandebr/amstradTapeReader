@@ -3,9 +3,9 @@ package org.maia.amstrad.io.tape;
 import java.io.File;
 
 import org.maia.amstrad.AmstradFactory;
+import org.maia.amstrad.io.tape.gui.UIFactory;
 import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioWaveFile;
-import org.maia.amstrad.io.tape.ui.UIFactory;
 
 public class TapeReaderMain {
 
