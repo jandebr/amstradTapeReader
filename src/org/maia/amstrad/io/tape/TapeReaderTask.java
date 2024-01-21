@@ -53,7 +53,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 
 	private AudioTapeBitDecorator audioTapeBitDecorator; // locates bits in the input file
 
-	private boolean minimalOutput;
+	private boolean minimalOutput; // omits certain optional outputs
 
 	private static NumberFormat programFolderNumberFormat;
 

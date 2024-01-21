@@ -22,7 +22,7 @@ public class TapeReaderMain {
 				outputDirectory.mkdirs();
 			AmstradFactory.getInstance().getAmstradContext().setProgramRepositoryRootFolder(outputDirectory);
 			TapeReaderTask task = new TapeReaderTask(audioFile, outputDirectory);
-			task.setMinimalOutput(true);
+			task.setMinimalOutput(true); 
 			task.readTape();
 			UIFactory.createAudioTapeIndexExtendedViewer(task.getTapeIndex(), task.getTapeProfile(), 20, true).show();
 		}
