@@ -287,9 +287,9 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		public void updateLabel() {
 			if (getSelectedProgram() == null) {
 				if (getAmstradPc() == null) {
-					setName(UIResources.launchCpcEmulatorLabel);
+					setName(UIResources.launchCpcLabel);
 				} else {
-					setName(UIResources.rebootCpcEmulatorLabel);
+					setName(UIResources.rebootCpcLabel);
 				}
 			} else {
 				setName(UIResources.openCodeEmulatorLabel);
@@ -304,19 +304,17 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 				@Override
 				public void run() {
 					AmstradPc amstradPc = getResetAmstradPc();
-					String amstradPcFrameTitle = "JavaCPC";
 					if (program != null) {
 						CharSequence sourceCode = program.getSourceCode().toExternalForm();
 						try {
 							amstradPc.getBasicRuntime().run(new LocomotiveBasicSourceCode(sourceCode));
-							amstradPcFrameTitle = program.getProgramName();
+							getAmstradPcFrame().setTitle(program.getProgramName());
 						} catch (ClassCastException e) {
 							System.err.println(e);
 						} catch (BasicException e) {
 							System.err.println(e);
 						}
 					}
-					getAmstradPcFrame().setTitle(amstradPcFrameTitle);
 					updateLabel();
 					setEnabled(true);
 				}

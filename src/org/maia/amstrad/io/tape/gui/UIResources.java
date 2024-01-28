@@ -22,9 +22,9 @@ public class UIResources {
 
 	public static Icon openCodeInspectorIcon = loadIcon(iconFolder + "code-trace-glass32.png");
 
-	public static String launchCpcEmulatorLabel = "Launch CPC";
+	public static String launchCpcLabel = "Launch CPC";
 
-	public static String rebootCpcEmulatorLabel = "Reboot CPC";
+	public static String rebootCpcLabel = "Reboot CPC";
 
 	public static String openCodeEmulatorLabel = "Emulate code";
 

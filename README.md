@@ -1,15 +1,16 @@
 # Amstrad Tape Reader
-Restores Amstrad Basic source code from WAV file tape recordings
+Restores Amstrad Basic source code from tape recordings (WAV files)
+
 
 ## Screenshots
-Main screen
-![screenshot](https://github.com/jandebr/amstradTapeReader/blob/main/screenshots/screenshot1.png)
+Setup screen
+![screenshot](https://github.com/jandebr/amstradTapeReader/blob/main/screenshots/screenshot0.png)
+
+Results screen, featuring [Amstrad PC](https://github.com/jandebr/amstradPc) for code emulation
+![screenshot](https://github.com/jandebr/amstradTapeReader/blob/main/screenshots/screenshot3.png)
 
 Code inspection shows the lineage from source code over byte code to audio samples
 ![screenshot](https://github.com/jandebr/amstradTapeReader/blob/main/screenshots/screenshot2.png)
-
-Code emulation with an integrated JavaCPC
-![screenshot](https://github.com/jandebr/amstradTapeReader/blob/main/screenshots/screenshot3.png)
 
 
 ## WAV file assumptions
