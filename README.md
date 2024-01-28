@@ -25,4 +25,4 @@ Code inspection shows the lineage from source code over byte code to audio sampl
 Follow these steps to start using *Amstrad Tape Reader*
 
 1. Download the project sources from [github](https://github.com/jandebr/amstradTapeReader)
-2. From the parent directory, run `java -Djava.library.path=system/jinput -jar dist/amstradTapeReader.jar`
+2. From the parent directory, run `java -Xmx1024m -Djava.library.path=system/jinput -jar dist/amstradTapeReader.jar`
