@@ -17,19 +17,24 @@ import org.maia.amstrad.io.tape.decorate.DecoratingLocomotiveBasicDecompiler;
 import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator;
 import org.maia.amstrad.io.tape.decorate.TapeDecorator;
 import org.maia.amstrad.io.tape.decorate.TapeDecorator.TapeSectionDecoration;
+import org.maia.amstrad.io.tape.model.AudioRange;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.Block;
 import org.maia.amstrad.io.tape.model.BlockData;
 import org.maia.amstrad.io.tape.model.ByteSequence;
 import org.maia.amstrad.io.tape.model.TapeProgram;
+import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration;
+import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration.MetaData;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
 import org.maia.amstrad.io.tape.model.sc.SourceCode;
 import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioTapeInputStream;
+import org.maia.amstrad.io.tape.read.ScopedAudioTapeInputStream;
 import org.maia.amstrad.io.tape.read.TapeReader;
 import org.maia.amstrad.io.tape.read.TapeReaderListener;
 import org.maia.amstrad.program.AmstradProgramMetaDataConstants;
+import org.maia.util.StringUtils;
 
 /**
  * Task that reconstructs programs from an Amstrad audio tape file
@@ -41,9 +46,7 @@ import org.maia.amstrad.program.AmstradProgramMetaDataConstants;
  */
 public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDataConstants {
 
-	private AudioFile audioFile; // tape recording .WAV file
-
-	private File outputDirectory; // root directory for all generated program folders
+	private TapeReaderTaskConfiguration taskConfiguration;
 
 	private AudioTapeIndex tapeIndex; // programs found on tape
 
@@ -62,17 +65,23 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 		programFolderNumberFormat.setMinimumIntegerDigits(2);
 	}
 
-	public TapeReaderTask(AudioFile audioFile, File outputDirectory) {
-		this.audioFile = audioFile;
-		this.outputDirectory = outputDirectory;
-		this.tapeIndex = new AudioTapeIndex(audioFile);
+	public TapeReaderTask(TapeReaderTaskConfiguration taskConfiguration) {
+		this.taskConfiguration = taskConfiguration;
+		this.tapeIndex = new AudioTapeIndex(taskConfiguration.getAudioFile());
 		this.tapeDecorator = new TapeDecorator();
 		this.blockDecorator = new BlockAudioDecorator(tapeDecorator);
 		this.audioTapeBitDecorator = new AudioTapeBitDecorator();
+		this.minimalOutput = true;
 	}
 
 	public void readTape() throws Exception {
-		AudioTapeInputStream atis = new AudioTapeInputStream(getAudioFile());
+		AudioTapeInputStream atis = null;
+		AudioRange audioRange = getTaskConfiguration().getSelectionInAudioFile();
+		if (audioRange != null) {
+			atis = new ScopedAudioTapeInputStream(getAudioFile(), audioRange);
+		} else {
+			atis = new AudioTapeInputStream(getAudioFile());
+		}
 		atis.addListener(getAudioTapeBitDecorator());
 		TapeReader reader = new TapeReader();
 		reader.addListener(this);
@@ -186,25 +195,20 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 	}
 
 	private void saveMetaData(AudioTapeProgram program, File programFolder) {
+		MetaData md = getTaskConfiguration().getDefaultProgramMetaData();
 		try {
 			PrintWriter pw = new PrintWriter(
-					new File(programFolder, "INFO-ATR" + AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension()),
+					new File(programFolder, "INFO" + AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension()),
 					"UTF-8");
 			pw.println(AMD_TYPE + ": " + AMD_TYPE_LOCOMOTIVE_BASIC_PROGRAM);
 			pw.println(AMD_NAME + ": " + program.getProgramName());
-			pw.println(AMD_AUTHOR + ": " + getDefaultMetaDatum(AMD_AUTHOR));
-			pw.println(AMD_YEAR + ": " + getDefaultMetaDatum(AMD_YEAR));
-			pw.println(AMD_TAPE + ": " + getDefaultMetaDatum(AMD_TAPE));
+			pw.println(AMD_AUTHOR + ": " + StringUtils.emptyForNull(md.getAuthor()));
+			pw.println(AMD_YEAR + ": " + StringUtils.emptyForNull(md.getYear()));
+			pw.println(AMD_TAPE + ": " + StringUtils.emptyForNull(md.getTape()));
 			pw.println(AMD_BLOCKS + ": " + program.getNumberOfBlocks());
-			pw.println(AMD_MONITOR + ": " + getDefaultMetaDatum(AMD_MONITOR));
-			pw.println(AMD_DESCRIPTION + ": " + getDefaultMetaDatum(AMD_DESCRIPTION));
-			pw.println(AMD_AUTHORING + ": " + getDefaultMetaDatum(AMD_AUTHORING));
-			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_HEADING + ": ");
-			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_KEY + ": ");
-			pw.println("#" + AMD_CONTROLS_PREFIX + "[1]" + AMD_CONTROLS_SUFFIX_DESCRIPTION + ": ");
-			pw.println("#" + AMD_IMAGES_PREFIX + "[1]" + AMD_IMAGES_SUFFIX_FILEREF + ": ");
-			pw.println("#" + AMD_IMAGES_PREFIX + "[1]" + AMD_IMAGES_SUFFIX_CAPTION + ": ");
-			pw.println("#" + AMD_COVER_IMAGE + ": ");
+			pw.println(AMD_MONITOR + ": " + StringUtils.emptyForNull(md.getMonitor()));
+			pw.println(AMD_DESCRIPTION + ": " + StringUtils.emptyForNull(md.getDescription()));
+			pw.println(AMD_AUTHORING + ": " + StringUtils.emptyForNull(md.getAuthoring()));
 			pw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -257,20 +261,16 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 		}
 	}
 
-	private String getDefaultMetaDatum(String key) {
-		return getDefaultMetaDatum(key, "");
+	private AudioFile getAudioFile() {
+		return getTaskConfiguration().getAudioFile();
 	}
 
-	private String getDefaultMetaDatum(String key, String defaultValue) {
-		return System.getProperty("amd." + key.toLowerCase(), defaultValue);
+	private File getOutputDirectory() {
+		return getTaskConfiguration().getOutputDirectory();
 	}
 
-	public AudioFile getAudioFile() {
-		return audioFile;
-	}
-
-	public File getOutputDirectory() {
-		return outputDirectory;
+	public TapeReaderTaskConfiguration getTaskConfiguration() {
+		return taskConfiguration;
 	}
 
 	public AudioTapeIndex getTapeIndex() {

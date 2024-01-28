@@ -15,6 +15,10 @@ public class AudioRange {
 		return "Audio range [" + getSampleOffset() + " , " + getSampleEnd() + "]";
 	}
 
+	public boolean contains(long samplePosition) {
+		return samplePosition >= getSampleOffset() && samplePosition <= getSampleEnd();
+	}
+
 	public long getSampleEnd() {
 		return getSampleOffset() + getSampleLength() - 1L;
 	}

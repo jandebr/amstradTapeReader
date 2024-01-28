@@ -24,23 +24,42 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 
 	private AudioRange displayRange;
 
+	private int audioFileSampleRate;
+
 	private int positionOnScreen;
 
 	private long positionInFile;
 
+	private boolean positionLabelInTimeNotation = true;
+
+	private boolean timeNotationInMillisPrecision = false;
+
 	private static NumberFormat positionNumberFormat;
+
+	private static NumberFormat twoDigitNumberFormat;
+
+	private static NumberFormat threeDigitNumberFormat;
+
+	public static Color STRIP_AUDIOFILE_COLOR = new Color(30, 30, 30);
+
+	public static Color STRIP_POSITION_COLOR = new Color(120, 120, 120);
 
 	static {
 		positionNumberFormat = NumberFormat.getIntegerInstance();
 		positionNumberFormat.setGroupingUsed(true);
+		twoDigitNumberFormat = NumberFormat.getIntegerInstance();
+		twoDigitNumberFormat.setMinimumIntegerDigits(2);
+		threeDigitNumberFormat = NumberFormat.getIntegerInstance();
+		threeDigitNumberFormat.setMinimumIntegerDigits(3);
 	}
 
 	public AudioFilePositionView(AudioFile audioFile) throws IOException {
 		this(audioFile, new AudioRange(0L, audioFile.getNumberOfSamples()));
 	}
 
-	public AudioFilePositionView(AudioFile audioFile, AudioRange displayRange) {
+	public AudioFilePositionView(AudioFile audioFile, AudioRange displayRange) throws IOException {
 		this.audioFile = audioFile;
+		this.audioFileSampleRate = audioFile.getSampleRate();
 		this.displayRange = displayRange;
 		clearPosition();
 		setBackground(Color.BLACK);
@@ -71,25 +90,30 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setColor(getBackground());
 		g2.fillRect(0, 0, getWidth(), getHeight());
-		paintAudioFileName(g2);
-		paintPosition(g2);
+		paintStrip(g2);
+		paintCurrentPosition(g2);
 	}
 
-	private void paintAudioFileName(Graphics2D g2) {
-		Font f = g2.getFont();
-		g2.setColor(new Color(30, 30, 30));
-		g2.setFont(f.deriveFont(Font.BOLD, 14));
-		String str = getAudioFile().toString();
-		int w = g2.getFontMetrics().stringWidth(str);
+	private void paintStrip(Graphics2D g2) {
+		Font fnt = g2.getFont();
+		Font fntBold = fnt.deriveFont(Font.BOLD, 14);
+		String str = getAudioFile().getSourceFile().getName();
+		int w = g2.getFontMetrics(fntBold).stringWidth(str);
 		int x = 4;
 		while (x < getWidth()) {
+			int xp = x + w + 8;
+			g2.setColor(STRIP_AUDIOFILE_COLOR);
+			g2.setFont(fntBold);
 			g2.drawString(str, x, 16);
-			x += w + 64;
+			g2.setColor(STRIP_POSITION_COLOR);
+			g2.setFont(fnt);
+			g2.drawString(getPositionLabel(mapScreenToFilePosition(xp)), xp, 16);
+			x += w + UIResources.audioPositionFileNameRepeatGap;
 		}
-		g2.setFont(f);
+		g2.setFont(fnt);
 	}
 
-	private void paintPosition(Graphics2D g2) {
+	private void paintCurrentPosition(Graphics2D g2) {
 		int x = getPositionOnScreen();
 		if (x >= 0) {
 			paintPositionLabel(g2, x);
@@ -98,15 +122,15 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 	}
 
 	private void paintPositionLabel(Graphics2D g2, int x) {
-		String str = String.valueOf(positionNumberFormat.format(getPositionInFile()));
-		int w = g2.getFontMetrics().stringWidth(str);
+		String label = getPositionLabel();
+		int w = g2.getFontMetrics().stringWidth(label);
 		if (x + w >= getWidth()) {
 			x = getWidth() - 1 - w;
 		}
 		g2.setColor(getBackground());
 		g2.fillRect(x - 2, 6, w + 4, 14);
 		g2.setColor(getForeground());
-		g2.drawString(str, x, 18);
+		g2.drawString(label, x, 18);
 	}
 
 	private void paintPositionMarker(Graphics2D g2, int x) {
@@ -114,6 +138,34 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 		for (int i = 0; i <= 5; i++) {
 			g2.drawLine(x - i, i, x + i, i);
 		}
+	}
+
+	private String getPositionLabel() {
+		return getPositionLabel(getPositionInFile());
+	}
+
+	private String getPositionLabel(long positionInFile) {
+		if (isPositionLabelInTimeNotation()) {
+			return getTimePositionInFileAsString(positionInFile);
+		} else {
+			return positionNumberFormat.format(positionInFile);
+		}
+	}
+
+	private String getTimePositionInFileAsString(long positionInFile) {
+		long seconds = Math.floorDiv(positionInFile, getAudioFileSampleRate());
+		long hours = Math.floorDiv(seconds, 3600);
+		int secondsInHour = Math.floorMod(seconds, 3600);
+		int minutesInHour = Math.floorDiv(secondsInHour, 60);
+		int secondsInMinute = Math.floorMod(secondsInHour, 60);
+		String str = twoDigitNumberFormat.format(hours) + ':' + twoDigitNumberFormat.format(minutesInHour) + ':'
+				+ twoDigitNumberFormat.format(secondsInMinute);
+		if (isTimeNotationInMillisPrecision()) {
+			int samplesInSecond = Math.floorMod(positionInFile, getAudioFileSampleRate());
+			int millis = Math.round(samplesInSecond * 1000f / getAudioFileSampleRate());
+			str += '.' + threeDigitNumberFormat.format(millis);
+		}
+		return str;
 	}
 
 	private void clearPosition() {
@@ -124,12 +176,15 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 
 	private void recordPosition(int x) {
 		if (getDisplayRange() != null) {
-			double r = x / (double) (getWidth() - 1);
-			long pos = getDisplayRange().getSampleOffset() + Math.round(r * getDisplayRange().getSampleLength());
 			setPositionOnScreen(x);
-			setPositionInFile(pos);
+			setPositionInFile(mapScreenToFilePosition(x));
 			repaint();
 		}
+	}
+
+	private long mapScreenToFilePosition(int x) {
+		double r = x / (double) (getWidth() - 1);
+		return getDisplayRange().getSampleOffset() + Math.round(r * getDisplayRange().getSampleLength());
 	}
 
 	@Override
@@ -188,6 +243,10 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 		return displayRange;
 	}
 
+	private int getAudioFileSampleRate() {
+		return audioFileSampleRate;
+	}
+
 	private int getPositionOnScreen() {
 		return positionOnScreen;
 	}
@@ -202,6 +261,22 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 
 	private void setPositionInFile(long positionInFile) {
 		this.positionInFile = positionInFile;
+	}
+
+	public boolean isPositionLabelInTimeNotation() {
+		return positionLabelInTimeNotation;
+	}
+
+	public void setPositionLabelInTimeNotation(boolean timeNotation) {
+		this.positionLabelInTimeNotation = timeNotation;
+	}
+
+	public boolean isTimeNotationInMillisPrecision() {
+		return timeNotationInMillisPrecision;
+	}
+
+	public void setTimeNotationInMillisPrecision(boolean millisPrecision) {
+		this.timeNotationInMillisPrecision = millisPrecision;
 	}
 
 }

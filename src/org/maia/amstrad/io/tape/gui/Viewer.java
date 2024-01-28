@@ -1,11 +1,14 @@
 package org.maia.amstrad.io.tape.gui;
 
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
 
 public class Viewer {
 
@@ -29,7 +32,6 @@ public class Viewer {
 	}
 
 	public void build() {
-		dispose();
 		JFrame frame = new JFrame(getTitle());
 		setFrame(frame);
 		frame.getContentPane().add(getView());
@@ -37,6 +39,12 @@ public class Viewer {
 		frame.setDefaultCloseOperation(isExitOnClose() ? JFrame.EXIT_ON_CLOSE : JFrame.DISPOSE_ON_CLOSE);
 		if (isDefaultCenteredOnScreen()) {
 			centerOnScreen();
+		}
+	}
+
+	public void setJMenuBar(JMenuBar menuBar) {
+		if (getFrame() != null) {
+			getFrame().setJMenuBar(menuBar);
 		}
 	}
 
@@ -52,9 +60,15 @@ public class Viewer {
 		}
 	}
 
-	public void dispose() {
+	public void close() {
 		if (getFrame() != null) {
-			getFrame().dispose();
+			getFrame().dispatchEvent(new WindowEvent(getFrame(), WindowEvent.WINDOW_CLOSING));
+		}
+	}
+
+	public void maximize() {
+		if (getFrame() != null) {
+			getFrame().setExtendedState(getFrame().getExtendedState() | Frame.MAXIMIZED_BOTH);
 		}
 	}
 

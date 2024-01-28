@@ -15,8 +15,8 @@ import javax.swing.JScrollPane;
 
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator;
-import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator;
 import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator.BytecodeAudioDecoration;
+import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator;
 import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator.SourcecodeBytecodeDecoration;
 import org.maia.amstrad.io.tape.model.AudioRange;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
@@ -127,9 +127,13 @@ public class CodeInspectorView extends JPanel implements SourceCodeView.SourceCo
 		clearAudioSelection();
 		List<AudioRangeView> rangeViews = new Vector<AudioRangeView>();
 		for (AudioRange range : getSelectedAudioRanges()) {
-			AudioRangeView rangeView = AudioRangeView.create(range, getAudioFile(), getAudioDecorator());
-			getAudioPane().add(rangeView);
-			rangeViews.add(rangeView);
+			try {
+				AudioRangeView rangeView = AudioRangeView.create(range, getAudioFile(), getAudioDecorator());
+				getAudioPane().add(rangeView);
+				rangeViews.add(rangeView);
+			} catch (IOException e) {
+				System.err.println(e);
+			}
 		}
 		if (!rangeViews.isEmpty()) {
 			validate();
@@ -143,8 +147,8 @@ public class CodeInspectorView extends JPanel implements SourceCodeView.SourceCo
 		List<AudioRange> ranges = new Vector<AudioRange>();
 		ByteCodeRange selection = getByteCodeView().getByteCodeSelection();
 		if (selection != null) {
-			List<BytecodeAudioDecoration> bads = getByteCodeDecorator().getDecorationsInsideRange(
-					selection.getByteCodeOffset(), selection.getByteCodeEnd());
+			List<BytecodeAudioDecoration> bads = getByteCodeDecorator()
+					.getDecorationsInsideRange(selection.getByteCodeOffset(), selection.getByteCodeEnd());
 			int i0 = 0;
 			for (int i = 1; i < bads.size(); i++) {
 				BytecodeAudioDecoration previousBad = bads.get(i - 1);
@@ -223,13 +227,14 @@ public class CodeInspectorView extends JPanel implements SourceCodeView.SourceCo
 		}
 
 		public static AudioRangeView create(AudioRange audioRange, AudioFile audioFile,
-				AudioTapeBitDecorator bitDecorator) {
+				AudioTapeBitDecorator bitDecorator) throws IOException {
 			AudioRange displayRange = extendedRangeForDisplay(audioRange, audioFile);
 			AudioFileWaveformView audioView = new AudioFileWaveformView(audioFile, displayRange, bitDecorator);
 			audioView.setSize(2 * (int) displayRange.getSampleLength(), 240);
 			audioView.setPreferredSize(audioView.getSize());
 			audioView.setSelectedRange(audioRange);
 			AudioFilePositionView audioPositionView = new AudioFilePositionView(audioFile, displayRange);
+			audioPositionView.setTimeNotationInMillisPrecision(true);
 			audioPositionView.track(audioView);
 			Box box = Box.createVerticalBox();
 			box.add(audioView);

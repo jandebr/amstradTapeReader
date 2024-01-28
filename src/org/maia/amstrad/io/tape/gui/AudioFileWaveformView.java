@@ -126,9 +126,10 @@ public class AudioFileWaveformView extends AudioFilePositionSource {
 	}
 
 	private void paintSelectionRangeInfo(Graphics2D g2) {
-		if (getSelectedRange() != null) {
+		AudioRange range = getSelectedRange();
+		if (range != null) {
 			Rectangle bounds = getBoundsOfSelectedRange();
-			String info = getSelectedRange().toString();
+			String info = "samples " + range.getSampleOffset() + " to " + range.getSampleEnd();
 			g2.setFont(SELECTION_INFO_FONT);
 			FontMetrics fm = g2.getFontMetrics();
 			int infoWidth = fm.stringWidth(info);

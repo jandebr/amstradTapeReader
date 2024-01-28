@@ -2,6 +2,7 @@ package org.maia.amstrad.io.tape.gui;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JComponent;
@@ -9,6 +10,7 @@ import javax.swing.JComponent;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.ByteSequence;
+import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfigurationIO;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
 import org.maia.amstrad.io.tape.model.sc.SourceCode;
 import org.maia.amstrad.io.tape.read.AudioFile;
@@ -18,8 +20,24 @@ public class UIFactory {
 	private UIFactory() {
 	}
 
-	public static Viewer createAudioFileProfileViewer(AudioFile audioFile, TapeProfile tapeProfile,
-			int pixelsPerSecond, boolean exitOnClose) throws IOException {
+	public static TapeReaderApplicationViewer createApplicationViewer(String[] args) throws IOException {
+		File taskConfigurationFile = new File("task.ini");
+		TapeReaderApplicationView view = createApplicationView(taskConfigurationFile);
+		TapeReaderTaskConfigurationIO.applyStartupArguments(view.getTaskConfiguration(), args);
+		return new TapeReaderApplicationViewer(view);
+	}
+
+	public static Viewer createAudioFileViewer(AudioFile audioFile, int pixelsPerSecond, boolean exitOnClose)
+			throws IOException {
+		JComponent view = createAudioFileExtendedView(audioFile, pixelsPerSecond);
+		String title = audioFile.getSourceFile().getName();
+		Viewer viewer = new Viewer(view, title, exitOnClose);
+		viewer.build();
+		return viewer;
+	}
+
+	public static Viewer createAudioFileProfileViewer(AudioFile audioFile, TapeProfile tapeProfile, int pixelsPerSecond,
+			boolean exitOnClose) throws IOException {
 		JComponent view = createExtendedProfileView(audioFile, tapeProfile, pixelsPerSecond);
 		String title = "Tape profile of " + audioFile;
 		Viewer viewer = new Viewer(view, title, exitOnClose);
@@ -37,8 +55,8 @@ public class UIFactory {
 
 	public static Viewer createAudioTapeIndexExtendedViewer(AudioTapeIndex tapeIndex, TapeProfile tapeProfile,
 			int pixelsPerSecond, boolean exitOnClose) throws IOException {
-		JComponent view = new AudioTapeIndexExtendedView(tapeIndex, createExtendedProfileView(tapeIndex.getAudioFile(),
-				tapeProfile, pixelsPerSecond));
+		JComponent view = new AudioTapeIndexExtendedView(tapeIndex,
+				createExtendedProfileView(tapeIndex.getAudioFile(), tapeProfile, pixelsPerSecond));
 		String title = "Index of " + tapeIndex.getAudioFile().getSourceFile().getName();
 		Viewer viewer = new Viewer(view, title, exitOnClose);
 		viewer.build();
@@ -69,13 +87,23 @@ public class UIFactory {
 		return viewer;
 	}
 
+	private static TapeReaderApplicationView createApplicationView(File taskConfigurationFile) throws IOException {
+		return new TapeReaderApplicationView(taskConfigurationFile);
+	}
+
+	private static AudioFileExtendedView createAudioFileExtendedView(AudioFile audioFile, int pixelsPerSecond)
+			throws IOException {
+		int maxWidth = (int) (getScreenSize().getWidth() * 0.94);
+		return new AudioFileExtendedView(audioFile, pixelsPerSecond, maxWidth);
+	}
+
 	private static AudioFileProfileExtendedView createExtendedProfileView(AudioFile audioFile, TapeProfile tapeProfile,
 			int pixelsPerSecond) throws IOException {
 		int maxWidth = (int) (getScreenSize().getWidth() * 0.94);
 		return new AudioFileProfileExtendedView(audioFile, tapeProfile, pixelsPerSecond, maxWidth);
 	}
 
-	private static Dimension getScreenSize() {
+	public static Dimension getScreenSize() {
 		return Toolkit.getDefaultToolkit().getScreenSize();
 	}
 

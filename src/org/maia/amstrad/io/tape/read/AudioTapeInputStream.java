@@ -19,6 +19,8 @@ public class AudioTapeInputStream extends TapeInputStream {
 
 	private List<AudioTapeInputStreamListener> listeners;
 
+	public static float DEFAULT_SPEED_FACTOR = 1.0f;
+
 	private static short DEFAULT_WAVE_TOP = 20000;
 
 	private static final short SILENCE_THRESHOLD = 5000;
@@ -28,7 +30,7 @@ public class AudioTapeInputStream extends TapeInputStream {
 	private static final float WAVE_THRESHOLD_FACTOR = 0.5f;
 
 	public AudioTapeInputStream(AudioFile audioFile) {
-		this(audioFile, 1.0f);
+		this(audioFile, DEFAULT_SPEED_FACTOR);
 	}
 
 	public AudioTapeInputStream(AudioFile audioFile, float speedFactor) {
@@ -258,15 +260,15 @@ public class AudioTapeInputStream extends TapeInputStream {
 		setState(getMemorizedStates().pop().clone());
 	}
 
-	private long getNumberOfSamples() throws IOException {
+	protected long getNumberOfSamples() throws IOException {
 		return getAudioFile().getNumberOfSamples();
 	}
 
-	private short getSample(long index) throws IOException {
+	protected short getSample(long index) throws IOException {
 		return getAudioFile().getSample(index);
 	}
 
-	private short getCurrentSample() throws IOException {
+	protected short getCurrentSample() throws IOException {
 		return getSample(getSamplePosition());
 	}
 

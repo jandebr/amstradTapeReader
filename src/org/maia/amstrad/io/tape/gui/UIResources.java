@@ -10,7 +10,13 @@ public class UIResources {
 
 	private static String iconFolder = "/icons/";
 
+	public static Icon wavesIcon = loadIcon(iconFolder + "waves.png");
+
+	public static Icon spinnerIcon = loadIcon(iconFolder + "spinner48.gif");
+
 	public static Icon amstradIcon = loadIcon(iconFolder + "amstrad.png");
+
+	public static Icon errorIcon = loadIcon(iconFolder + "error.png");
 
 	public static String openCodeInspectorLabel = "Inspect code";
 
@@ -38,9 +44,15 @@ public class UIResources {
 
 	public static Dimension audioInspectorViewSize = new Dimension(1024, 284);
 
+	public static int audioViewHeight = 240;
+
 	public static int audioProfileViewHeight = 240;
 
 	public static int audioPositionViewHeight = 24;
+
+	public static int audioPositionFileNameRepeatGap = 200;
+
+	public static int audioExtendedViewHeight = audioViewHeight + audioPositionViewHeight + 20;
 
 	private static float[] hsbComps = new float[3];
 
@@ -61,7 +73,8 @@ public class UIResources {
 			brightness = 1.0 - darkness;
 		}
 		int rgba = (color.getAlpha() << 24)
-				| (Color.HSBtoRGB(hsbComps[0], hsbComps[1] * (float) (Math.min(1.0, 1.0 - factor)), (float) brightness) & 0x00ffffff);
+				| (Color.HSBtoRGB(hsbComps[0], hsbComps[1] * (float) (Math.min(1.0, 1.0 - factor)), (float) brightness)
+						& 0x00ffffff);
 		return new Color(rgba, true);
 	}
 
