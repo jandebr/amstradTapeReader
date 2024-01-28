@@ -18,3 +18,11 @@ Code inspection shows the lineage from source code over byte code to audio sampl
 * The audio sample size is **16-bit**
     * stored as 2's-complement signed integers, ranging from -32768 to 32767
     * byte ordering is little-endian
+
+    
+## Getting started
+
+Follow these steps to start using *Amstrad Tape Reader*
+
+1. Download the project sources from [github](https://github.com/jandebr/amstradTapeReader)
+2. From the parent directory, run `java -Djava.library.path=system/jinput -jar dist/amstradTapeReader.jar`
