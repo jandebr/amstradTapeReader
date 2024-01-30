@@ -86,7 +86,7 @@ public class ByteSequence {
 			if (line.length() + bs.length() > maxLineLength) {
 				page.append(line).append('\n');
 				if (moff >= 0) {
-					page.append(Marker.getUnderlineString(moff, mlen)).append('\n');
+					page.append(getUnderlineString(moff, mlen)).append('\n');
 					moff = -1;
 				}
 				line.setLength(0);
@@ -103,13 +103,22 @@ public class ByteSequence {
 		if (line.length() > 0) {
 			page.append(line);
 			if (moff >= 0) {
-				page.append('\n').append(Marker.getUnderlineString(moff, mlen));
+				page.append('\n').append(getUnderlineString(moff, mlen));
 			}
 		}
 		if (positions != null && positions.length >= getLength() + 1) {
 			positions[getLength()] = page.length();
 		}
 		return page.toString();
+	}
+
+	private static String getUnderlineString(int offset, int length) {
+		StringBuilder sb = new StringBuilder(offset + length);
+		for (int i = 0; i < offset; i++)
+			sb.append(' ');
+		for (int i = 0; i < length; i++)
+			sb.append('^');
+		return sb.toString();
 	}
 
 	public void addByte(byte bite) {
@@ -136,8 +145,8 @@ public class ByteSequence {
 
 	public void truncate(int length) {
 		if (length > getLength())
-			throw new IllegalArgumentException("Cannot truncate beyond the end of this sequence: " + length + " > "
-					+ getLength());
+			throw new IllegalArgumentException(
+					"Cannot truncate beyond the end of this sequence: " + length + " > " + getLength());
 		else if (length < getLength()) {
 			this.bytes = new Vector<Byte>(getBytes().subList(0, length));
 		}
@@ -177,6 +186,20 @@ public class ByteSequence {
 
 	public List<Byte> getBytes() {
 		return bytes;
+	}
+
+	public static class Marker {
+
+		private int position;
+
+		public Marker(int position) {
+			this.position = position;
+		}
+
+		public int getPosition() {
+			return position;
+		}
+
 	}
 
 }

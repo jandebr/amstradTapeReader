@@ -22,13 +22,13 @@ public class UIResources {
 
 	public static Icon openCodeInspectorIcon = loadIcon(iconFolder + "code-trace-glass32.png");
 
-	public static String launchCpcLabel = "Launch CPC";
+	public static String loadCodeLabel = "Load in CPC";
 
-	public static String rebootCpcLabel = "Reboot CPC";
+	public static Icon loadCodeIcon = loadIcon(iconFolder + "cpc32.png");
 
-	public static String openCodeEmulatorLabel = "Emulate code";
+	public static String runCodeLabel = "Run in CPC";
 
-	public static Icon openCodeEmulatorIcon = loadIcon(iconFolder + "cpc32.png");
+	public static Icon runCodeIcon = loadIcon(iconFolder + "cpc-run32.png");
 
 	public static String clearSelectionLabel = "Clear selection";
 

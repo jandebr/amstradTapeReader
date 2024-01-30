@@ -1,15 +1,15 @@
 package org.maia.amstrad.io.tape.model;
 
+import org.maia.amstrad.basic.BasicSourceCode;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator;
 import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
-import org.maia.amstrad.io.tape.model.sc.SourceCode;
 import org.maia.amstrad.io.tape.read.AudioFile;
 
 public class AudioTapeProgram extends TapeProgram {
 
-	private SourceCode sourceCode;
+	private BasicSourceCode sourceCode;
 
 	private SourcecodeBytecodeDecorator sourceCodeDecorator;
 
@@ -24,7 +24,7 @@ public class AudioTapeProgram extends TapeProgram {
 	private AudioTapeProgram() {
 	}
 
-	public static AudioTapeProgram createFrom(TapeProgram program, SourceCode sourceCode,
+	public static AudioTapeProgram createFrom(TapeProgram program, BasicSourceCode sourceCode,
 			SourcecodeBytecodeDecorator sourceCodeDecorator, BytecodeAudioDecorator byteCodeDecorator,
 			AudioFile audioFile, AudioTapeBitDecorator audioDecorator, TapeProfile profileOnTape) {
 		AudioTapeProgram audioTapeProgram = new AudioTapeProgram();
@@ -40,11 +40,11 @@ public class AudioTapeProgram extends TapeProgram {
 		return audioTapeProgram;
 	}
 
-	public SourceCode getSourceCode() {
+	public BasicSourceCode getSourceCode() {
 		return sourceCode;
 	}
 
-	private void setSourceCode(SourceCode sourceCode) {
+	private void setSourceCode(BasicSourceCode sourceCode) {
 		this.sourceCode = sourceCode;
 	}
 

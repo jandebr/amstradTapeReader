@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
+import org.maia.amstrad.basic.BasicSourceCode;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator;
 import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator.BytecodeAudioDecoration;
@@ -22,9 +23,8 @@ import org.maia.amstrad.io.tape.model.AudioRange;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.ByteCodeRange;
 import org.maia.amstrad.io.tape.model.ByteSequence;
-import org.maia.amstrad.io.tape.model.sc.SourceCode;
-import org.maia.amstrad.io.tape.model.sc.SourceCodePosition;
-import org.maia.amstrad.io.tape.model.sc.SourceCodeRange;
+import org.maia.amstrad.io.tape.model.SourceCodePosition;
+import org.maia.amstrad.io.tape.model.SourceCodeRange;
 import org.maia.amstrad.io.tape.read.AudioFile;
 
 @SuppressWarnings("serial")
@@ -53,7 +53,7 @@ public class CodeInspectorView extends JPanel implements SourceCodeView.SourceCo
 		add(getAudioPane(), BorderLayout.SOUTH);
 	}
 
-	private SourceCodeView buildSourceCodeView(SourceCode sourceCode) {
+	private SourceCodeView buildSourceCodeView(BasicSourceCode sourceCode) {
 		SourceCodeView view = new SourceCodeView(sourceCode);
 		view.setPreferredSize(UIResources.sourceCodeInspectorViewSize);
 		view.addCaretListener(this);

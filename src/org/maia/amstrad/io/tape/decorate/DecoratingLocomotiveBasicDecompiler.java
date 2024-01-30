@@ -3,14 +3,10 @@ package org.maia.amstrad.io.tape.decorate;
 import org.maia.amstrad.basic.BasicByteCode;
 import org.maia.amstrad.basic.locomotive.LocomotiveBasicDecompiler;
 import org.maia.amstrad.io.tape.model.ByteCodeRange;
-import org.maia.amstrad.io.tape.model.sc.SourceCode;
-import org.maia.amstrad.io.tape.model.sc.SourceCodeLine;
-import org.maia.amstrad.io.tape.model.sc.SourceCodePosition;
-import org.maia.amstrad.io.tape.model.sc.SourceCodeRange;
+import org.maia.amstrad.io.tape.model.SourceCodePosition;
+import org.maia.amstrad.io.tape.model.SourceCodeRange;
 
 public class DecoratingLocomotiveBasicDecompiler extends LocomotiveBasicDecompiler {
-
-	private SourceCode sourceCode;
 
 	private SourcecodeBytecodeDecorator sourceCodeDecorator;
 
@@ -20,7 +16,6 @@ public class DecoratingLocomotiveBasicDecompiler extends LocomotiveBasicDecompil
 	@Override
 	protected void init(BasicByteCode byteCode) {
 		super.init(byteCode);
-		this.sourceCode = new SourceCode();
 		this.sourceCodeDecorator = new SourcecodeBytecodeDecorator();
 	}
 
@@ -31,18 +26,8 @@ public class DecoratingLocomotiveBasicDecompiler extends LocomotiveBasicDecompil
 				bytecodeLength);
 		SourceCodePosition from = new SourceCodePosition(lineNumber, linePositionFrom);
 		SourceCodePosition until = new SourceCodePosition(lineNumber, linePositionUntil);
-		getSourceCodeDecorator().decorate(getSourceCode(), new SourceCodeRange(from, until),
+		getSourceCodeDecorator().decorate(new SourceCodeRange(from, until),
 				new ByteCodeRange(bytecodeOffset, bytecodeLength));
-	}
-
-	@Override
-	protected void addedSourceCodeLine(int lineNumber, CharSequence lineOfCode) {
-		super.addedSourceCodeLine(lineNumber, lineOfCode);
-		getSourceCode().addLine(new SourceCodeLine(lineNumber, lineOfCode));
-	}
-
-	public SourceCode getSourceCode() {
-		return sourceCode;
 	}
 
 	public SourcecodeBytecodeDecorator getSourceCodeDecorator() {

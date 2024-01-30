@@ -4,10 +4,8 @@ import java.util.List;
 
 import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator.SourcecodeBytecodeDecoration;
 import org.maia.amstrad.io.tape.model.ByteCodeRange;
-import org.maia.amstrad.io.tape.model.sc.SourceCode;
-import org.maia.amstrad.io.tape.model.sc.SourceCodeLine;
-import org.maia.amstrad.io.tape.model.sc.SourceCodePosition;
-import org.maia.amstrad.io.tape.model.sc.SourceCodeRange;
+import org.maia.amstrad.io.tape.model.SourceCodePosition;
+import org.maia.amstrad.io.tape.model.SourceCodeRange;
 
 public class SourcecodeBytecodeDecorator extends SequenceDecorator<SourcecodeBytecodeDecoration> {
 
@@ -15,8 +13,8 @@ public class SourcecodeBytecodeDecorator extends SequenceDecorator<SourcecodeByt
 		super(2000);
 	}
 
-	public void decorate(SourceCode sourceCode, SourceCodeRange sourceCodeRange, ByteCodeRange byteCodeRange) {
-		addDecoration(new SourcecodeBytecodeDecoration(sourceCode, sourceCodeRange, byteCodeRange));
+	public void decorate(SourceCodeRange sourceCodeRange, ByteCodeRange byteCodeRange) {
+		addDecoration(new SourcecodeBytecodeDecoration(sourceCodeRange, byteCodeRange));
 	}
 
 	public List<SourcecodeBytecodeDecoration> getDecorationsInsideRange(SourceCodePosition from,
@@ -36,18 +34,14 @@ public class SourcecodeBytecodeDecorator extends SequenceDecorator<SourcecodeByt
 
 	public static class SourcecodeBytecodeDecoration extends SequenceDecoration {
 
-		private SourceCode sourceCode;
-
 		private SourceCodeRange sourceCodeRange;
 
 		private ByteCodeRange byteCodeRange;
 
-		public SourcecodeBytecodeDecoration(SourceCode sourceCode, SourceCodeRange sourceCodeRange,
-				ByteCodeRange byteCodeRange) {
+		public SourcecodeBytecodeDecoration(SourceCodeRange sourceCodeRange, ByteCodeRange byteCodeRange) {
 			super(convertToSequentialOffset(sourceCodeRange.getStartPosition()),
 					convertToSequentialOffset(sourceCodeRange.getEndPosition())
 							- convertToSequentialOffset(sourceCodeRange.getStartPosition()) + 1L);
-			this.sourceCode = sourceCode;
 			this.sourceCodeRange = sourceCodeRange;
 			this.byteCodeRange = byteCodeRange;
 		}
@@ -60,15 +54,6 @@ public class SourcecodeBytecodeDecorator extends SequenceDecorator<SourcecodeByt
 			sb.append(from);
 			sb.append(" -> ");
 			sb.append(until);
-			sb.append(" : ");
-			if (from.getLineNumber() == until.getLineNumber()) {
-				// on same line
-				SourceCodeLine line = getSourceCode().getLine(from.getLineNumber());
-				CharSequence code = line.getCode().subSequence(from.getLinePosition(), until.getLinePosition() + 1);
-				sb.append(code);
-			} else {
-				sb.append("<multi-line>");
-			}
 			sb.append(" (bytecode@");
 			sb.append(getByteCodeRange().getByteCodeOffset());
 			sb.append("->");
@@ -80,10 +65,6 @@ public class SourcecodeBytecodeDecorator extends SequenceDecorator<SourcecodeByt
 		@Override
 		protected String getHumanReadableDecoration() {
 			return null;
-		}
-
-		public SourceCode getSourceCode() {
-			return sourceCode;
 		}
 
 		public SourceCodeRange getSourceCodeRange() {

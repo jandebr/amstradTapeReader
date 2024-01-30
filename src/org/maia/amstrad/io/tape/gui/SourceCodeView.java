@@ -22,15 +22,15 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
-import org.maia.amstrad.io.tape.model.sc.SourceCode;
-import org.maia.amstrad.io.tape.model.sc.SourceCodeLine;
-import org.maia.amstrad.io.tape.model.sc.SourceCodePosition;
-import org.maia.amstrad.io.tape.model.sc.SourceCodeRange;
+import org.maia.amstrad.basic.BasicSourceCode;
+import org.maia.amstrad.basic.BasicSourceCodeLine;
+import org.maia.amstrad.io.tape.model.SourceCodePosition;
+import org.maia.amstrad.io.tape.model.SourceCodeRange;
 
 @SuppressWarnings("serial")
 public class SourceCodeView extends JPanel implements CaretListener {
 
-	private SourceCode sourceCode;
+	private BasicSourceCode sourceCode;
 
 	private int[] sourceCodeLineOffsets; // JTextPane document offsets by line index
 
@@ -50,10 +50,10 @@ public class SourceCodeView extends JPanel implements CaretListener {
 
 	private static Color SOURCE_CODE_BACKGROUND = new Color(0, 10, 0);
 
-	public SourceCodeView(SourceCode sourceCode) {
+	public SourceCodeView(BasicSourceCode sourceCode) {
 		super(new BorderLayout());
 		this.sourceCode = sourceCode;
-		this.sourceCodeLineOffsets = new int[sourceCode.getLines().size()];
+		this.sourceCodeLineOffsets = new int[sourceCode.getLineCount()];
 		this.styleContext = createStyleContext();
 		this.caretListeners = new Vector<SourceCodeCaretListener>();
 		buildView();
@@ -116,12 +116,12 @@ public class SourceCodeView extends JPanel implements CaretListener {
 		Document doc = pane.getDocument();
 		Style style = pane.getStyle(NAMED_STYLE_LINENUMBER);
 		try {
-			int n = getSourceCode().getLines().size();
+			int n = getSourceCode().getLineCount();
 			for (int i = 0; i < n; i++) {
 				if (i > 0)
 					doc.insertString(doc.getLength(), "\n", style);
-				SourceCodeLine line = getSourceCode().getLines().get(i);
-				doc.insertString(doc.getLength(), String.valueOf(line.getLineNumber()), style);
+				int lineNumber = getSourceCode().getLineByIndex(i).getLineNumber();
+				doc.insertString(doc.getLength(), String.valueOf(lineNumber), style);
 			}
 		} catch (BadLocationException e) {
 			e.printStackTrace();
@@ -138,13 +138,13 @@ public class SourceCodeView extends JPanel implements CaretListener {
 		Document doc = pane.getDocument();
 		Style style = pane.getStyle(NAMED_STYLE_SOURCECODE);
 		try {
-			int n = getSourceCode().getLines().size();
+			int n = getSourceCode().getLineCount();
 			for (int i = 0; i < n; i++) {
 				if (i > 0)
 					doc.insertString(doc.getLength(), "\n", style);
 				this.sourceCodeLineOffsets[i] = doc.getLength();
-				SourceCodeLine line = getSourceCode().getLines().get(i);
-				doc.insertString(doc.getLength(), line.getCode().toString(), style);
+				String lineCode = getSourceCode().getLineByIndex(i).getCode();
+				doc.insertString(doc.getLength(), lineCode, style);
 			}
 		} catch (BadLocationException e) {
 			e.printStackTrace();
@@ -197,7 +197,7 @@ public class SourceCodeView extends JPanel implements CaretListener {
 			row = -row - 2;
 		if (row >= 0 && row < sourceCodeLineOffsets.length) {
 			int col = documentOffset - sourceCodeLineOffsets[row];
-			SourceCodeLine line = getSourceCode().getLines().get(row);
+			BasicSourceCodeLine line = getSourceCode().getLineByIndex(row);
 			if (col < line.getCode().length()) {
 				position = new SourceCodePosition(line.getLineNumber(), col);
 			}
@@ -207,15 +207,23 @@ public class SourceCodeView extends JPanel implements CaretListener {
 
 	private int mapDocumentOffset(SourceCodePosition position) {
 		int offset = -1;
-		SourceCodeLine line = getSourceCode().getLine(position.getLineNumber());
+		BasicSourceCodeLine line = getSourceCode().getLineByLineNumber(position.getLineNumber());
 		if (line != null) {
-			int lineIndex = getSourceCode().getLines().indexOf(line);
+			int lineIndex = findSourceCodeLineIndex(line, getSourceCode());
 			offset = sourceCodeLineOffsets[lineIndex] + position.getLinePosition();
 		}
 		return offset;
 	}
 
-	public SourceCode getSourceCode() {
+	private int findSourceCodeLineIndex(BasicSourceCodeLine line, BasicSourceCode sourceCode) {
+		for (int i = 0; i < sourceCode.getLineCount(); i++) {
+			if (sourceCode.getLineByIndex(i).equals(line))
+				return i;
+		}
+		return -1;
+	}
+
+	public BasicSourceCode getSourceCode() {
 		return sourceCode;
 	}
 

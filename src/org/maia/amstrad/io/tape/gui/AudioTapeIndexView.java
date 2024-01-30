@@ -1,40 +1,21 @@
 package org.maia.amstrad.io.tape.gui;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
-import org.maia.amstrad.AmstradFactory;
-import org.maia.amstrad.basic.BasicException;
-import org.maia.amstrad.basic.locomotive.LocomotiveBasicSourceCode;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
-import org.maia.amstrad.pc.AmstradPc;
-import org.maia.amstrad.pc.AmstradPcFrame;
-import org.maia.amstrad.pc.menu.AmstradMenuBar;
-import org.maia.amstrad.pc.menu.maker.AmstradMenuBarMaker;
-import org.maia.amstrad.pc.menu.maker.AmstradMenuDefaultLookAndFeel;
 
 @SuppressWarnings("serial")
 public class AudioTapeIndexView extends JPanel implements ListSelectionListener {
@@ -43,23 +24,13 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 
 	private JTable table;
 
-	private CodeInspectorAction codeInspectorAction;
-
-	private CodeEmulatorAction codeEmulatorAction;
-
-	private ClearSelectionAction clearSelectionAction;
-
 	private List<IndexSelectionListener> selectionListeners;
-
-	private AmstradPc amstradPc;
-
-	private AmstradPcFrame amstradPcFrame;
 
 	public AudioTapeIndexView(AudioTapeIndex tapeIndex) {
 		super(new BorderLayout());
 		this.tapeIndex = tapeIndex;
 		this.selectionListeners = new Vector<IndexSelectionListener>();
-		buildView();
+		add(buildIndexPane(), BorderLayout.CENTER);
 	}
 
 	public void addSelectionListener(IndexSelectionListener listener) {
@@ -68,22 +39,6 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 
 	public void removeSelectionListener(IndexSelectionListener listener) {
 		getSelectionListeners().remove(listener);
-	}
-
-	private void buildView() {
-		add(buildActionsPane(), BorderLayout.NORTH);
-		add(buildIndexPane(), BorderLayout.CENTER);
-	}
-
-	private JComponent buildActionsPane() {
-		buildActions();
-		Box box = Box.createHorizontalBox();
-		box.add(new ProgramButton(getCodeInspectorAction()));
-		box.add(Box.createHorizontalStrut(4));
-		box.add(new ProgramButton(getCodeEmulatorAction()));
-		box.add(Box.createHorizontalStrut(4));
-		box.add(new ProgramButton(getClearSelectionAction()));
-		return box;
 	}
 
 	private JComponent buildIndexPane() {
@@ -100,28 +55,6 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		table.getSelectionModel().addListSelectionListener(this);
 		this.table = table;
 		return table;
-	}
-
-	private void buildActions() {
-		this.codeInspectorAction = new CodeInspectorAction();
-		this.codeEmulatorAction = new CodeEmulatorAction();
-		this.clearSelectionAction = new ClearSelectionAction();
-	}
-
-	private synchronized AmstradPc getResetAmstradPc() {
-		AmstradPc amstradPc = getAmstradPc();
-		if (amstradPc == null) {
-			amstradPc = AmstradFactory.getInstance().createAmstradPc();
-			AmstradPcFrame frame = amstradPc.displayInFrame(false);
-			frame.addWindowListener(new AmstradPcTerminator());
-			setAmstradPc(amstradPc);
-			setAmstradPcFrame(frame);
-			new AmstradMenuBarMakerImpl().createMenuBar().install();
-			amstradPc.start(true, false);
-		} else {
-			amstradPc.reboot(true, false);
-		}
-		return amstradPc;
 	}
 
 	public void clearSelection() {
@@ -141,10 +74,6 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 	@Override
 	public void valueChanged(ListSelectionEvent event) {
 		if (!event.getValueIsAdjusting()) {
-			AudioTapeProgram program = getSelectedProgram();
-			getCodeInspectorAction().setEnabled(program != null);
-			getClearSelectionAction().setEnabled(program != null);
-			getCodeEmulatorAction().updateLabel();
 			for (IndexSelectionListener listener : getSelectionListeners()) {
 				listener.indexSelectionUpdate(this);
 			}
@@ -178,160 +107,13 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		return table;
 	}
 
-	private CodeInspectorAction getCodeInspectorAction() {
-		return codeInspectorAction;
-	}
-
-	private CodeEmulatorAction getCodeEmulatorAction() {
-		return codeEmulatorAction;
-	}
-
-	private ClearSelectionAction getClearSelectionAction() {
-		return clearSelectionAction;
-	}
-
 	private List<IndexSelectionListener> getSelectionListeners() {
 		return selectionListeners;
 	}
 
-	private synchronized AmstradPc getAmstradPc() {
-		return amstradPc;
-	}
+	public static interface IndexSelectionListener {
 
-	private synchronized void setAmstradPc(AmstradPc amstradPc) {
-		this.amstradPc = amstradPc;
-	}
-
-	private AmstradPcFrame getAmstradPcFrame() {
-		return amstradPcFrame;
-	}
-
-	private void setAmstradPcFrame(AmstradPcFrame amstradPcFrame) {
-		this.amstradPcFrame = amstradPcFrame;
-	}
-
-	private class AmstradPcTerminator extends WindowAdapter {
-
-		public AmstradPcTerminator() {
-		}
-
-		@Override
-		public void windowClosed(WindowEvent e) {
-			AmstradPc amstradPc = getAmstradPc();
-			if (amstradPc != null) {
-				amstradPc.terminate();
-				setAmstradPc(null);
-				getCodeEmulatorAction().updateLabel();
-				getCodeEmulatorAction().setEnabled(true);
-			}
-		}
-
-	}
-
-	private class ProgramButton extends JButton {
-
-		public ProgramButton(ProgramAction action) {
-			super(action);
-			setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(),
-					BorderFactory.createEmptyBorder(2, 2, 2, 2)));
-			setFocusPainted(false);
-		}
-
-	}
-
-	private abstract class ProgramAction extends AbstractAction {
-
-		protected ProgramAction(Icon icon) {
-			this(null, icon);
-		}
-
-		protected ProgramAction(String name, Icon icon) {
-			super(name, icon);
-			setEnabled(false);
-		}
-
-		protected void setName(String name) {
-			putValue(Action.NAME, name);
-		}
-
-		protected void setToolTipText(String text) {
-			putValue(Action.SHORT_DESCRIPTION, text);
-		}
-
-	}
-
-	private class CodeInspectorAction extends ProgramAction {
-
-		public CodeInspectorAction() {
-			super(UIResources.openCodeInspectorLabel, UIResources.openCodeInspectorIcon);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent event) {
-			AudioTapeProgram program = getSelectedProgram();
-			if (program != null) {
-				UIFactory.createCodeInspectorViewer(program, false).show();
-			}
-		}
-
-	}
-
-	private class CodeEmulatorAction extends ProgramAction {
-
-		public CodeEmulatorAction() {
-			super(UIResources.openCodeEmulatorIcon);
-			updateLabel();
-			setEnabled(true);
-		}
-
-		public void updateLabel() {
-			if (getSelectedProgram() == null) {
-				if (getAmstradPc() == null) {
-					setName(UIResources.launchCpcLabel);
-				} else {
-					setName(UIResources.rebootCpcLabel);
-				}
-			} else {
-				setName(UIResources.openCodeEmulatorLabel);
-			}
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent event) {
-			setEnabled(false);
-			final AudioTapeProgram program = getSelectedProgram();
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					AmstradPc amstradPc = getResetAmstradPc();
-					if (program != null) {
-						CharSequence sourceCode = program.getSourceCode().toExternalForm();
-						try {
-							amstradPc.getBasicRuntime().run(new LocomotiveBasicSourceCode(sourceCode));
-							getAmstradPcFrame().setTitle(program.getProgramName());
-						} catch (ClassCastException e) {
-							System.err.println(e);
-						} catch (BasicException e) {
-							System.err.println(e);
-						}
-					}
-					updateLabel();
-					setEnabled(true);
-				}
-			}).start();
-		}
-	}
-
-	private class ClearSelectionAction extends ProgramAction {
-
-		public ClearSelectionAction() {
-			super(UIResources.clearSelectionLabel, UIResources.clearSelectionIcon);
-		}
-
-		@Override
-		public void actionPerformed(ActionEvent event) {
-			clearSelection();
-		}
+		void indexSelectionUpdate(AudioTapeIndexView source);
 
 	}
 
@@ -360,7 +142,7 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 			} else if (col == 2) {
 				return program.getNumberOfBlocks();
 			} else if (col == 3) {
-				return program.getSourceCode().getLines().size();
+				return program.getSourceCode().getLineCount();
 			} else if (col == 4) {
 				TapeProfile programProfile = program.getProfileOnTape();
 				return programProfile != null ? programProfile.getAudioRange().getSampleOffset() : 0L;
@@ -408,46 +190,6 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 			} else {
 				return null;
 			}
-		}
-
-	}
-
-	public static interface IndexSelectionListener {
-
-		void indexSelectionUpdate(AudioTapeIndexView source);
-
-	}
-
-	private class AmstradMenuBarMakerImpl extends AmstradMenuBarMaker {
-
-		public AmstradMenuBarMakerImpl() {
-			super(AudioTapeIndexView.this.getAmstradPc(), new AmstradMenuDefaultLookAndFeel());
-		}
-
-		@Override
-		protected AmstradMenuBar doCreateMenu() {
-			AmstradMenuBar menuBar = new AmstradMenuBar(getAmstradPc());
-			menuBar.add(createRestrictedFileMenu());
-			menuBar.add(createEmulatorMenu());
-			menuBar.add(createMonitorMenu());
-			menuBar.add(createWindowMenu());
-			return updateMenuBarLookAndFeel(menuBar);
-		}
-
-		protected JMenu createRestrictedFileMenu() {
-			JMenu menu = new JMenu("File");
-			// setting up program browser (already done)
-			menu.add(createProgramBrowserMenuItem());
-			menu.add(new JSeparator());
-			menu.add(createLoadBasicSourceFileMenuItem());
-			menu.add(createLoadBasicBinaryFileMenuItem());
-			menu.add(createLoadSnapshotFileMenuItem());
-			menu.add(new JSeparator());
-			menu.add(createSaveBasicSourceFileMenuItem());
-			menu.add(createSaveBasicBinaryFileMenuItem());
-			menu.add(createSaveSnapshotFileMenuItem());
-			// no poweroff
-			return updateMenuLookAndFeel(menu);
 		}
 
 	}

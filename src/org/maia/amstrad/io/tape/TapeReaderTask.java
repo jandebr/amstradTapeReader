@@ -7,7 +7,9 @@ import java.text.NumberFormat;
 import java.util.Iterator;
 
 import org.maia.amstrad.AmstradFileType;
+import org.maia.amstrad.basic.BasicByteCode;
 import org.maia.amstrad.basic.BasicException;
+import org.maia.amstrad.basic.BasicSourceCode;
 import org.maia.amstrad.basic.locomotive.LocomotiveBasicByteCode;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator;
@@ -27,13 +29,13 @@ import org.maia.amstrad.io.tape.model.TapeProgram;
 import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration;
 import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration.MetaData;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
-import org.maia.amstrad.io.tape.model.sc.SourceCode;
 import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioTapeInputStream;
 import org.maia.amstrad.io.tape.read.ScopedAudioTapeInputStream;
 import org.maia.amstrad.io.tape.read.TapeReader;
 import org.maia.amstrad.io.tape.read.TapeReaderListener;
 import org.maia.amstrad.program.AmstradProgramMetaDataConstants;
+import org.maia.io.util.IOUtils;
 import org.maia.util.StringUtils;
 
 /**
@@ -56,7 +58,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 
 	private AudioTapeBitDecorator audioTapeBitDecorator; // locates bits in the input file
 
-	private boolean minimalOutput; // omits certain optional outputs
+	private boolean saveByteCode; // whether to save byte code next to source code
 
 	private static NumberFormat programFolderNumberFormat;
 
@@ -71,7 +73,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 		this.tapeDecorator = new TapeDecorator();
 		this.blockDecorator = new BlockAudioDecorator(tapeDecorator);
 		this.audioTapeBitDecorator = new AudioTapeBitDecorator();
-		this.minimalOutput = true;
+		this.saveByteCode = true;
 	}
 
 	public void readTape() throws Exception {
@@ -102,9 +104,6 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 		System.out.println();
 		System.out.println(getTapeProfile());
 		saveProgramIndex();
-		if (!isMinimalOutput()) {
-			saveTapeProfile();
-		}
 	}
 
 	@Override
@@ -128,11 +127,11 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 		System.out.println("End reading program \"" + program.getProgramName() + "\"");
 		System.out.println();
 		// Decompile
-		ByteSequence byteCode = program.getByteCode();
+		ByteSequence codeBytes = program.getByteCode();
 		DecoratingLocomotiveBasicDecompiler decompiler = new DecoratingLocomotiveBasicDecompiler();
 		try {
-			decompiler.decompile(new LocomotiveBasicByteCode(byteCode.getBytesArray()));
-			SourceCode sourceCode = decompiler.getSourceCode();
+			BasicByteCode byteCode = new LocomotiveBasicByteCode(codeBytes.getBytesArray());
+			BasicSourceCode sourceCode = decompiler.decompile(byteCode);
 			SourcecodeBytecodeDecorator sourceCodeDecorator = decompiler.getSourceCodeDecorator();
 			// Assemble
 			TapeProfile profileOnTape = getProfileOnTape(program);
@@ -145,7 +144,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 			File programFolder = createProgramFolder(audioTapeProgram, i);
 			saveMetaData(audioTapeProgram, programFolder);
 			saveSourceCode(audioTapeProgram, programFolder);
-			if (!isMinimalOutput()) {
+			if (isSaveByteCode()) {
 				saveByteCode(audioTapeProgram, programFolder);
 			}
 		} catch (BasicException e) {
@@ -216,10 +215,10 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 	}
 
 	private void saveSourceCode(AudioTapeProgram program, File programFolder) {
-		SourceCode sourceCode = program.getSourceCode();
+		File sourceCodeFile = new File(programFolder,
+				"code" + AmstradFileType.BASIC_SOURCE_CODE_FILE.getFileExtension());
 		try {
-			sourceCode
-					.save(new File(programFolder, "code" + AmstradFileType.BASIC_SOURCE_CODE_FILE.getFileExtension()));
+			IOUtils.writeTextFileContents(sourceCodeFile, program.getSourceCode().getText());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -230,15 +229,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 		try {
 			byteCode.save(
 					new File(programFolder, "bytecode" + AmstradFileType.BASIC_BYTE_CODE_FILE.getFileExtension()));
-			byteCode.saveAsText(new File(programFolder, "bytecode.txt"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void saveTapeProfile() {
-		try {
-			getTapeProfile().save(new File(getOutputDirectory(), "tapeprofile.dat"));
+			// byteCode.saveAsText(new File(programFolder, "bytecode.txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -293,12 +284,12 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 		return audioTapeBitDecorator;
 	}
 
-	public boolean isMinimalOutput() {
-		return minimalOutput;
+	public boolean isSaveByteCode() {
+		return saveByteCode;
 	}
 
-	public void setMinimalOutput(boolean minimalOutput) {
-		this.minimalOutput = minimalOutput;
+	public void setSaveByteCode(boolean save) {
+		this.saveByteCode = save;
 	}
 
 }

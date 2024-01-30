@@ -7,12 +7,12 @@ import java.io.IOException;
 
 import javax.swing.JComponent;
 
+import org.maia.amstrad.basic.BasicSourceCode;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.ByteSequence;
 import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfigurationIO;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
-import org.maia.amstrad.io.tape.model.sc.SourceCode;
 import org.maia.amstrad.io.tape.read.AudioFile;
 
 public class UIFactory {
@@ -71,7 +71,7 @@ public class UIFactory {
 		return viewer;
 	}
 
-	public static Viewer createSourceCodeViewer(SourceCode sourceCode, String programName, boolean exitOnClose) {
+	public static Viewer createSourceCodeViewer(BasicSourceCode sourceCode, String programName, boolean exitOnClose) {
 		JComponent view = new SourceCodeView(sourceCode);
 		String title = "Source code of " + programName;
 		Viewer viewer = new Viewer(view, title, exitOnClose);

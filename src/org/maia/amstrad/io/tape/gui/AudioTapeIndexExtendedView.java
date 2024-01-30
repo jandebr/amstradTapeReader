@@ -2,6 +2,7 @@ package org.maia.amstrad.io.tape.gui;
 
 import java.awt.BorderLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -19,6 +20,8 @@ public class AudioTapeIndexExtendedView extends JPanel implements IndexSelection
 
 	private AudioTapeIndexView indexView;
 
+	private AudioTapeIndexToolBar indexToolBar;
+
 	private AudioFileProfileExtendedView profileExtendedView;
 
 	private JComponent detailPane;
@@ -26,6 +29,8 @@ public class AudioTapeIndexExtendedView extends JPanel implements IndexSelection
 	public AudioTapeIndexExtendedView(AudioTapeIndex tapeIndex, AudioFileProfileExtendedView profileExtendedView) {
 		super(new BorderLayout());
 		this.tapeIndex = tapeIndex;
+		this.indexView = buildIndexView();
+		this.indexToolBar = buildIndexToolBar();
 		this.profileExtendedView = profileExtendedView;
 		profileExtendedView.showTapeIndex(tapeIndex);
 		profileExtendedView.addSectionListener(this);
@@ -33,7 +38,8 @@ public class AudioTapeIndexExtendedView extends JPanel implements IndexSelection
 	}
 
 	private void buildView() {
-		add(buildIndexView(), BorderLayout.WEST);
+		add(getIndexToolBar(), BorderLayout.NORTH);
+		add(getIndexView(), BorderLayout.WEST);
 		add(getProfileExtendedView(), BorderLayout.SOUTH);
 		updateDetailPane(buildStubDetailPane());
 	}
@@ -41,8 +47,13 @@ public class AudioTapeIndexExtendedView extends JPanel implements IndexSelection
 	private AudioTapeIndexView buildIndexView() {
 		AudioTapeIndexView view = new AudioTapeIndexView(getTapeIndex());
 		view.addSelectionListener(this);
-		this.indexView = view;
 		return view;
+	}
+
+	private AudioTapeIndexToolBar buildIndexToolBar() {
+		AudioTapeIndexToolBar toolBar = new AudioTapeIndexToolBar(getIndexView());
+		toolBar.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
+		return toolBar;
 	}
 
 	private JComponent buildProgramDetailPane(AudioTapeProgram program) {
@@ -93,6 +104,10 @@ public class AudioTapeIndexExtendedView extends JPanel implements IndexSelection
 
 	public AudioTapeIndexView getIndexView() {
 		return indexView;
+	}
+
+	public AudioTapeIndexToolBar getIndexToolBar() {
+		return indexToolBar;
 	}
 
 	public AudioFileProfileExtendedView getProfileExtendedView() {
