@@ -128,17 +128,22 @@ public class AudioFileWaveformView extends AudioFilePositionSource {
 	private void paintSelectionRangeInfo(Graphics2D g2) {
 		AudioRange range = getSelectedRange();
 		if (range != null) {
-			Rectangle bounds = getBoundsOfSelectedRange();
-			String info = "samples " + range.getSampleOffset() + " to " + range.getSampleEnd();
-			g2.setFont(SELECTION_INFO_FONT);
-			FontMetrics fm = g2.getFontMetrics();
-			int infoWidth = fm.stringWidth(info);
-			int x = bounds.x + bounds.width / 2 - infoWidth / 2;
-			int ybase = 20;
-			g2.setColor(SELECTION_INFO_BACKDROP_COLOR);
-			g2.fillRect(x, ybase - fm.getAscent(), infoWidth, fm.getAscent() + fm.getDescent());
-			g2.setColor(SELECTION_INFO_COLOR);
-			g2.drawString(info, x, ybase);
+			try {
+				int sampleRate = getAudioFile().getSampleRate();
+				String info = "[ " + UIResources.formatTimeOfAudioSamplePosition(range.getSampleOffset(), sampleRate, true)
+						+ " , " + UIResources.formatTimeOfAudioSamplePosition(range.getSampleEnd(), sampleRate, true) + " ]";
+				g2.setFont(SELECTION_INFO_FONT);
+				FontMetrics fm = g2.getFontMetrics();
+				Rectangle bounds = getBoundsOfSelectedRange();
+				int infoWidth = fm.stringWidth(info);
+				int x = bounds.x + bounds.width / 2 - infoWidth / 2;
+				int ybase = 20;
+				g2.setColor(SELECTION_INFO_BACKDROP_COLOR);
+				g2.fillRect(x, ybase - fm.getAscent(), infoWidth, fm.getAscent() + fm.getDescent());
+				g2.setColor(SELECTION_INFO_COLOR);
+				g2.drawString(info, x, ybase);
+			} catch (IOException e) {
+			}
 		}
 	}
 

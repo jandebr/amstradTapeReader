@@ -6,6 +6,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -37,6 +38,7 @@ public class Viewer {
 		frame.getContentPane().add(getView());
 		frame.pack();
 		frame.setDefaultCloseOperation(isExitOnClose() ? JFrame.EXIT_ON_CLOSE : JFrame.DISPOSE_ON_CLOSE);
+		frame.setIconImage(((ImageIcon) UIResources.windowIcon).getImage());
 		if (isDefaultCenteredOnScreen()) {
 			centerOnScreen();
 		}

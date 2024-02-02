@@ -36,10 +36,6 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 
 	private static NumberFormat positionNumberFormat;
 
-	private static NumberFormat twoDigitNumberFormat;
-
-	private static NumberFormat threeDigitNumberFormat;
-
 	public static Color STRIP_AUDIOFILE_COLOR = new Color(30, 30, 30);
 
 	public static Color STRIP_POSITION_COLOR = new Color(120, 120, 120);
@@ -47,10 +43,6 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 	static {
 		positionNumberFormat = NumberFormat.getIntegerInstance();
 		positionNumberFormat.setGroupingUsed(true);
-		twoDigitNumberFormat = NumberFormat.getIntegerInstance();
-		twoDigitNumberFormat.setMinimumIntegerDigits(2);
-		threeDigitNumberFormat = NumberFormat.getIntegerInstance();
-		threeDigitNumberFormat.setMinimumIntegerDigits(3);
 	}
 
 	public AudioFilePositionView(AudioFile audioFile) throws IOException {
@@ -146,26 +138,11 @@ public class AudioFilePositionView extends JPanel implements MouseListener, Mous
 
 	private String getPositionLabel(long positionInFile) {
 		if (isPositionLabelInTimeNotation()) {
-			return getTimePositionInFileAsString(positionInFile);
+			return UIResources.formatTimeOfAudioSamplePosition(positionInFile, getAudioFileSampleRate(),
+					isTimeNotationInMillisPrecision());
 		} else {
 			return positionNumberFormat.format(positionInFile);
 		}
-	}
-
-	private String getTimePositionInFileAsString(long positionInFile) {
-		long seconds = Math.floorDiv(positionInFile, getAudioFileSampleRate());
-		long hours = Math.floorDiv(seconds, 3600);
-		int secondsInHour = Math.floorMod(seconds, 3600);
-		int minutesInHour = Math.floorDiv(secondsInHour, 60);
-		int secondsInMinute = Math.floorMod(secondsInHour, 60);
-		String str = twoDigitNumberFormat.format(hours) + ':' + twoDigitNumberFormat.format(minutesInHour) + ':'
-				+ twoDigitNumberFormat.format(secondsInMinute);
-		if (isTimeNotationInMillisPrecision()) {
-			int samplesInSecond = Math.floorMod(positionInFile, getAudioFileSampleRate());
-			int millis = Math.round(samplesInSecond * 1000f / getAudioFileSampleRate());
-			str += '.' + threeDigitNumberFormat.format(millis);
-		}
-		return str;
 	}
 
 	private void clearPosition() {

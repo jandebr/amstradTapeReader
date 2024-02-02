@@ -1,9 +1,11 @@
 package org.maia.amstrad.io.tape.gui;
 
 import java.awt.BorderLayout;
+import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -12,7 +14,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumnModel;
 
+import org.maia.amstrad.io.tape.model.AudioRange;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
@@ -29,8 +33,21 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 	public AudioTapeIndexView(AudioTapeIndex tapeIndex) {
 		super(new BorderLayout());
 		this.tapeIndex = tapeIndex;
+		this.table = buildTable();
 		this.selectionListeners = new Vector<IndexSelectionListener>();
 		add(buildIndexPane(), BorderLayout.CENTER);
+	}
+
+	private JTable buildTable() {
+		JTable table = new IndexTable();
+		table.getSelectionModel().addListSelectionListener(this);
+		table.setPreferredScrollableViewportSize(table.getPreferredSize());
+		return table;
+	}
+
+	private JComponent buildIndexPane() {
+		JScrollPane scrollPane = new JScrollPane(getTable());
+		return scrollPane;
 	}
 
 	public void addSelectionListener(IndexSelectionListener listener) {
@@ -39,22 +56,6 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 
 	public void removeSelectionListener(IndexSelectionListener listener) {
 		getSelectionListeners().remove(listener);
-	}
-
-	private JComponent buildIndexPane() {
-		JScrollPane scrollPane = new JScrollPane(buildTable());
-		return scrollPane;
-	}
-
-	private JTable buildTable() {
-		JTable table = new JTable(new IndexTableModel());
-		table.getColumnModel().getColumn(0).setMaxWidth(40);
-		table.getColumnModel().getColumn(1).setMinWidth(120);
-		table.getColumnModel().getColumn(2).setMaxWidth(60);
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.getSelectionModel().addListSelectionListener(this);
-		this.table = table;
-		return table;
 	}
 
 	public void clearSelection() {
@@ -117,6 +118,25 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 
 	}
 
+	private class IndexTable extends JTable {
+
+		public IndexTable() {
+			super(new IndexTableModel());
+			setupColumnWidths();
+			setAutoResizeMode(AUTO_RESIZE_OFF);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		}
+
+		private void setupColumnWidths() {
+			TableColumnModel col = getColumnModel();
+			col.getColumn(0).setMinWidth(20);
+			col.getColumn(0).setMaxWidth(20);
+			col.getColumn(1).setMaxWidth(40);
+			col.getColumn(2).setMinWidth(180);
+		}
+
+	}
+
 	private class IndexTableModel extends AbstractTableModel {
 
 		public IndexTableModel() {
@@ -124,7 +144,7 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 
 		@Override
 		public int getColumnCount() {
-			return 6;
+			return 7;
 		}
 
 		@Override
@@ -134,40 +154,49 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 
 		@Override
 		public Object getValueAt(int row, int col) {
+			Object value = null;
 			AudioTapeProgram program = getProgramForRow(row);
 			if (col == 0) {
-				return row + 1;
+				value = program.hasModifiedSourceCode() ? UIResources.pencilIcon : UIResources.tapeIcon;
 			} else if (col == 1) {
-				return program.getProgramName();
+				value = row + 1;
 			} else if (col == 2) {
-				return program.getNumberOfBlocks();
+				value = program.getProgramName();
 			} else if (col == 3) {
-				return program.getSourceCode().getLineCount();
+				value = program.getNumberOfBlocks();
 			} else if (col == 4) {
+				value = program.getSourceCodeOnTape().getLineCount();
+			} else if (col == 5 || col == 6) {
 				TapeProfile programProfile = program.getProfileOnTape();
-				return programProfile != null ? programProfile.getAudioRange().getSampleOffset() : 0L;
-			} else if (col == 5) {
-				TapeProfile programProfile = program.getProfileOnTape();
-				return programProfile != null ? programProfile.getAudioRange().getSampleEnd() : 0L;
-			} else {
-				return null;
+				if (programProfile != null) {
+					AudioRange range = programProfile.getAudioRange();
+					long samplePosition = col == 5 ? range.getSampleOffset() : range.getSampleEnd();
+					try {
+						int sampleRate = program.getAudioFile().getSampleRate();
+						value = UIResources.formatTimeOfAudioSamplePosition(samplePosition, sampleRate, false);
+					} catch (IOException e) {
+					}
+				}
 			}
+			return value;
 		}
 
 		@Override
 		public String getColumnName(int col) {
 			if (col == 0) {
-				return "#";
+				return "";
 			} else if (col == 1) {
-				return "Name";
+				return "Nr.";
 			} else if (col == 2) {
-				return "Blocks";
+				return "Name";
 			} else if (col == 3) {
-				return "Code lines";
+				return "Blocks";
 			} else if (col == 4) {
-				return "Audio start";
+				return "Code lines";
 			} else if (col == 5) {
-				return "Audio end";
+				return "Tape from";
+			} else if (col == 6) {
+				return "Tape until";
 			} else {
 				return null;
 			}
@@ -176,16 +205,18 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 		@Override
 		public Class<?> getColumnClass(int col) {
 			if (col == 0) {
-				return Integer.class;
+				return Icon.class;
 			} else if (col == 1) {
-				return String.class;
-			} else if (col == 2) {
 				return Integer.class;
+			} else if (col == 2) {
+				return String.class;
 			} else if (col == 3) {
 				return Integer.class;
 			} else if (col == 4) {
-				return Long.class;
+				return Integer.class;
 			} else if (col == 5) {
+				return Long.class;
+			} else if (col == 6) {
 				return Long.class;
 			} else {
 				return null;

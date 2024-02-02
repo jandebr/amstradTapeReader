@@ -8,13 +8,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.maia.amstrad.io.tape.gui.AudioFileProfileView.TapeSectionListener;
+import org.maia.amstrad.io.tape.gui.AudioTapeIndexToolBar.ToolBarListener;
 import org.maia.amstrad.io.tape.gui.AudioTapeIndexView.IndexSelectionListener;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.profile.TapeSection;
 
 @SuppressWarnings("serial")
-public class AudioTapeIndexExtendedView extends JPanel implements IndexSelectionListener, TapeSectionListener {
+public class AudioTapeIndexExtendedView extends JPanel
+		implements IndexSelectionListener, TapeSectionListener, ToolBarListener {
 
 	private AudioTapeIndex tapeIndex;
 
@@ -53,11 +55,12 @@ public class AudioTapeIndexExtendedView extends JPanel implements IndexSelection
 	private AudioTapeIndexToolBar buildIndexToolBar() {
 		AudioTapeIndexToolBar toolBar = new AudioTapeIndexToolBar(getIndexView());
 		toolBar.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
+		toolBar.addListener(this);
 		return toolBar;
 	}
 
 	private JComponent buildProgramDetailPane(AudioTapeProgram program) {
-		SourceCodeView scv = new SourceCodeView(program.getSourceCode());
+		SourceCodeView scv = new SourceCodeView(program.getLatestSourceCode());
 		return scv;
 	}
 
@@ -65,6 +68,13 @@ public class AudioTapeIndexExtendedView extends JPanel implements IndexSelection
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(new JLabel(UIResources.amstradIcon), BorderLayout.CENTER);
 		return panel;
+	}
+
+	public void updateDetailPane() {
+		AudioTapeProgram program = getIndexView().getSelectedProgram();
+		if (program != null) {
+			updateDetailPane(buildProgramDetailPane(program));
+		}
 	}
 
 	private void updateDetailPane(JComponent newDetailPane) {
@@ -95,6 +105,23 @@ public class AudioTapeIndexExtendedView extends JPanel implements IndexSelection
 			getIndexView().changeSelection(program);
 		} else {
 			getIndexView().clearSelection();
+		}
+	}
+
+	@Override
+	public void notifyModifiedSourceCodeSaved(AudioTapeProgram tapeProgram) {
+		notifyModifiedSourceCode(tapeProgram);
+	}
+
+	@Override
+	public void notifyModifiedSourceCodeReverted(AudioTapeProgram tapeProgram) {
+		notifyModifiedSourceCode(tapeProgram);
+	}
+
+	private void notifyModifiedSourceCode(AudioTapeProgram tapeProgram) {
+		getIndexView().repaint(); // update program edit status icon
+		if (tapeProgram.equals(getIndexView().getSelectedProgram())) {
+			updateDetailPane();
 		}
 	}
 

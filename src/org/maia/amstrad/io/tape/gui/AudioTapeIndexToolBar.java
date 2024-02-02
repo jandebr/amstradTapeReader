@@ -1,9 +1,11 @@
 package org.maia.amstrad.io.tape.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
+import java.util.List;
+import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -12,84 +14,113 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JMenu;
-import javax.swing.JSeparator;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
-import org.maia.amstrad.AmstradFactory;
-import org.maia.amstrad.basic.BasicException;
+import org.maia.amstrad.io.tape.gui.AmstradPcPlugin.AmstradPcListener;
 import org.maia.amstrad.io.tape.gui.AudioTapeIndexView.IndexSelectionListener;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
-import org.maia.amstrad.pc.AmstradPc;
-import org.maia.amstrad.pc.AmstradPcFrame;
-import org.maia.amstrad.pc.menu.AmstradMenuBar;
-import org.maia.amstrad.pc.menu.maker.AmstradMenuBarMaker;
-import org.maia.amstrad.pc.menu.maker.AmstradMenuDefaultLookAndFeel;
-import org.maia.amstrad.program.AmstradProgram;
 import org.maia.amstrad.program.AmstradProgramException;
-import org.maia.amstrad.program.load.AmstradProgramLoader;
-import org.maia.amstrad.program.load.AmstradProgramLoaderFactory;
 
 @SuppressWarnings("serial")
-public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener {
+public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener, AmstradPcListener {
 
 	private AudioTapeIndexView indexView;
 
 	private CodeInspectorAction codeInspectorAction;
 
-	private CodeLoadAction codeLoadAction;
+	private CodeRevertAction codeRevertAction;
 
-	private CodeRunAction codeRunAction;
+	private CodeEditAction codeEditAction;
+
+	private MetadataEditAction metadataEditAction;
+
+	private ProgramLoadAction programLoadAction;
+
+	private ProgramRunAction programRunAction;
 
 	private ClearSelectionAction clearSelectionAction;
 
-	private AmstradPc amstradPc;
+	private AmstradPcPlugin amstradPcPlugin;
 
-	private AmstradPcFrame amstradPcFrame;
+	private List<ToolBarListener> listeners;
 
 	public AudioTapeIndexToolBar(AudioTapeIndexView indexView) {
 		super(BoxLayout.X_AXIS);
 		this.indexView = indexView;
 		this.codeInspectorAction = new CodeInspectorAction();
-		this.codeLoadAction = new CodeLoadAction();
-		this.codeRunAction = new CodeRunAction();
+		this.codeRevertAction = new CodeRevertAction();
+		this.codeEditAction = new CodeEditAction();
+		this.metadataEditAction = new MetadataEditAction();
+		this.programLoadAction = new ProgramLoadAction();
+		this.programRunAction = new ProgramRunAction();
 		this.clearSelectionAction = new ClearSelectionAction();
+		this.amstradPcPlugin = new AmstradPcPlugin();
+		this.listeners = new Vector<ToolBarListener>();
 		indexView.addSelectionListener(this);
+		getAmstradPcPlugin().addListener(this);
 		buildUI();
 	}
 
 	private void buildUI() {
 		add(new ProgramButton(getCodeInspectorAction()));
 		add(Box.createHorizontalStrut(4));
-		add(new ProgramButton(getCodeLoadAction()));
+		add(new ProgramButton(getProgramLoadAction()));
 		add(Box.createHorizontalStrut(4));
-		add(new ProgramButton(getCodeRunAction()));
+		add(new ProgramButton(getProgramRunAction()));
+		add(Box.createHorizontalStrut(4));
+		add(new ProgramButton(getMetadataEditAction()));
+		add(Box.createHorizontalStrut(4));
+		add(new ProgramButton(getCodeEditAction()));
+		add(Box.createHorizontalStrut(4));
+		add(new ProgramButton(getCodeRevertAction()));
 		add(Box.createHorizontalStrut(4));
 		add(new ProgramButton(getClearSelectionAction()));
+	}
+
+	public void addListener(ToolBarListener listener) {
+		getListeners().add(listener);
+	}
+
+	public void removeListener(ToolBarListener listener) {
+		getListeners().remove(listener);
 	}
 
 	@Override
 	public void indexSelectionUpdate(AudioTapeIndexView source) {
 		boolean programSelection = getSelectedProgram() != null;
 		getCodeInspectorAction().setEnabled(programSelection);
-		getCodeLoadAction().setEnabled(programSelection);
-		getCodeRunAction().setEnabled(programSelection);
+		// TODO getCodeEditAction().setEnabled(programSelection);
+		// TODO getMetadataEditAction().setEnabled(programSelection);
+		getProgramLoadAction().setEnabled(programSelection);
+		getProgramRunAction().setEnabled(programSelection);
 		getClearSelectionAction().setEnabled(programSelection);
+		updateCodeRevertEnablement();
 	}
 
-	private synchronized AmstradPc getResetAmstradPc() {
-		AmstradPc amstradPc = getAmstradPc();
-		if (amstradPc == null) {
-			amstradPc = AmstradFactory.getInstance().createAmstradPc();
-			AmstradPcFrame frame = amstradPc.displayInFrame(false);
-			frame.addWindowListener(new AmstradPcTerminator());
-			setAmstradPc(amstradPc);
-			setAmstradPcFrame(frame);
-			new AmstradMenuBarMakerImpl().createMenuBar().install();
-			amstradPc.start(true, false);
-		} else {
-			amstradPc.reboot(true, false);
+	private void updateCodeRevertEnablement() {
+		AudioTapeProgram tapeProgram = getSelectedProgram();
+		getCodeRevertAction().setEnabled(tapeProgram != null && tapeProgram.hasModifiedSourceCode());
+	}
+
+	@Override
+	public void notifyModifiedSourceCodeSaved(AudioTapeProgram tapeProgram) {
+		fireModifiedSourceCodeSaved(tapeProgram); // propagate
+		updateCodeRevertEnablement();
+	}
+
+	private void fireModifiedSourceCodeSaved(AudioTapeProgram tapeProgram) {
+		for (ToolBarListener listener : getListeners()) {
+			listener.notifyModifiedSourceCodeSaved(tapeProgram);
 		}
-		return amstradPc;
+	}
+
+	private void fireModifiedSourceCodeReverted(AudioTapeProgram tapeProgram) {
+		for (ToolBarListener listener : getListeners()) {
+			listener.notifyModifiedSourceCodeReverted(tapeProgram);
+		}
 	}
 
 	public AudioTapeProgram getSelectedProgram() {
@@ -104,32 +135,36 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 		return codeInspectorAction;
 	}
 
-	private CodeLoadAction getCodeLoadAction() {
-		return codeLoadAction;
+	private CodeRevertAction getCodeRevertAction() {
+		return codeRevertAction;
 	}
 
-	private CodeRunAction getCodeRunAction() {
-		return codeRunAction;
+	private CodeEditAction getCodeEditAction() {
+		return codeEditAction;
+	}
+
+	private MetadataEditAction getMetadataEditAction() {
+		return metadataEditAction;
+	}
+
+	private ProgramLoadAction getProgramLoadAction() {
+		return programLoadAction;
+	}
+
+	private ProgramRunAction getProgramRunAction() {
+		return programRunAction;
 	}
 
 	private ClearSelectionAction getClearSelectionAction() {
 		return clearSelectionAction;
 	}
 
-	private synchronized AmstradPc getAmstradPc() {
-		return amstradPc;
+	private AmstradPcPlugin getAmstradPcPlugin() {
+		return amstradPcPlugin;
 	}
 
-	private synchronized void setAmstradPc(AmstradPc amstradPc) {
-		this.amstradPc = amstradPc;
-	}
-
-	private AmstradPcFrame getAmstradPcFrame() {
-		return amstradPcFrame;
-	}
-
-	private void setAmstradPcFrame(AmstradPcFrame frame) {
-		this.amstradPcFrame = frame;
+	private List<ToolBarListener> getListeners() {
+		return listeners;
 	}
 
 	private class ProgramButton extends JButton {
@@ -137,7 +172,7 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 		public ProgramButton(ProgramAction action) {
 			super(action);
 			setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(),
-					BorderFactory.createEmptyBorder(2, 2, 2, 2)));
+					BorderFactory.createEmptyBorder(2, 6, 2, 6)));
 			setFocusPainted(false);
 		}
 
@@ -168,6 +203,7 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 
 		public ClearSelectionAction() {
 			super(UIResources.clearSelectionLabel, UIResources.clearSelectionIcon);
+			setToolTipText(UIResources.clearSelectionTooltip);
 		}
 
 		@Override
@@ -181,127 +217,149 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 
 		public CodeInspectorAction() {
 			super(UIResources.openCodeInspectorLabel, UIResources.openCodeInspectorIcon);
+			setToolTipText(UIResources.openCodeInspectorTooltip);
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent event) {
 			AudioTapeProgram program = getSelectedProgram();
 			if (program != null) {
-				UIFactory.createCodeInspectorViewer(program, false).show();
+				new Viewer(createView(program), "Code inspection of " + program.getProgramName(), false).buildAndShow();
+			}
+		}
+
+		private JComponent createView(AudioTapeProgram program) {
+			JPanel panel = new JPanel(new BorderLayout());
+			if (program.hasModifiedSourceCode()) {
+				panel.add(createModifiedSourceCodeWarning(), BorderLayout.NORTH);
+			}
+			panel.add(new CodeInspectorView(program), BorderLayout.CENTER);
+			return panel;
+		}
+
+		private JComponent createModifiedSourceCodeWarning() {
+			JLabel label = new JLabel("Changes were made to the original source code on tape, shown here",
+					UIResources.pencilIcon, SwingConstants.LEADING);
+			label.setOpaque(true);
+			label.setBackground(Color.BLACK);
+			label.setForeground(Color.YELLOW);
+			label.setFont(label.getFont().deriveFont(Font.ITALIC));
+			label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+			return label;
+		}
+
+	}
+
+	private class CodeRevertAction extends ProgramAction {
+
+		public CodeRevertAction() {
+			super(UIResources.revertCodeLabel, UIResources.revertCodeIcon);
+			setToolTipText(UIResources.revertCodeTooltip);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent event) {
+			AudioTapeProgram tapeProgram = getSelectedProgram();
+			if (tapeProgram != null) {
+				tapeProgram.revertSourceCodeModifications();
+				fireModifiedSourceCodeReverted(tapeProgram);
+				updateCodeRevertEnablement();
 			}
 		}
 
 	}
 
-	private abstract class AmstradPcAction extends ProgramAction {
+	private class CodeEditAction extends ProgramAction {
 
-		protected AmstradPcAction(String name, Icon icon) {
+		public CodeEditAction() {
+			super(UIResources.editCodeLabel, UIResources.editCodeIcon);
+			setToolTipText(UIResources.editCodeTooltip);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent event) {
+			// TODO
+		}
+
+	}
+
+	private class MetadataEditAction extends ProgramAction {
+
+		public MetadataEditAction() {
+			super(UIResources.editMetadataLabel, UIResources.editMetadataIcon);
+			setToolTipText(UIResources.editMetadataTooltip);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent event) {
+			// TODO
+		}
+
+	}
+
+	private abstract class ProgramLaunchAction extends ProgramAction {
+
+		protected ProgramLaunchAction(String name, Icon icon) {
 			super(name, icon);
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			final AudioTapeProgram program = getSelectedProgram();
-			if (program != null) {
+			final AudioTapeProgram tapeProgram = getSelectedProgram();
+			if (tapeProgram != null) {
 				setEnabled(false);
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						AmstradPc amstradPc = getResetAmstradPc();
-						getAmstradPcFrame().setTitle(program.getProgramName());
-						performAction(amstradPc, program);
-						setEnabled(true);
+						try {
+							launchProgram(tapeProgram);
+						} catch (AmstradProgramException e) {
+							System.err.println(e);
+						} finally {
+							setEnabled(true);
+						}
 					}
 				}).start();
 			}
 		}
 
-		protected abstract void performAction(AmstradPc amstradPc, AudioTapeProgram program);
+		protected abstract void launchProgram(AudioTapeProgram tapeProgram) throws AmstradProgramException;
 
 	}
 
-	private class CodeLoadAction extends AmstradPcAction {
+	private class ProgramLoadAction extends ProgramLaunchAction {
 
-		public CodeLoadAction() {
-			super(UIResources.loadCodeLabel, UIResources.loadCodeIcon);
+		public ProgramLoadAction() {
+			super(UIResources.loadProgramLabel, UIResources.loadProgramIcon);
+			setToolTipText(UIResources.loadProgramTooltip);
 		}
 
 		@Override
-		protected void performAction(AmstradPc amstradPc, AudioTapeProgram program) {
-			try {
-				amstradPc.getBasicRuntime().load(program.getSourceCode());
-			} catch (BasicException e) {
-				System.err.println(e);
-			}
+		protected void launchProgram(AudioTapeProgram tapeProgram) throws AmstradProgramException {
+			getAmstradPcPlugin().load(tapeProgram);
 		}
 
 	}
 
-	private class CodeRunAction extends AmstradPcAction {
+	private class ProgramRunAction extends ProgramLaunchAction {
 
-		public CodeRunAction() {
-			super(UIResources.runCodeLabel, UIResources.runCodeIcon);
+		public ProgramRunAction() {
+			super(UIResources.runProgramLabel, UIResources.runProgramIcon);
+			setToolTipText(UIResources.runProgramTooltip);
 		}
 
 		@Override
-		protected void performAction(AmstradPc amstradPc, AudioTapeProgram program) {
-			try {
-				File codeFile = null;
-				File metadataFile = null;
-				AmstradProgram amstradProgram = AmstradFactory.getInstance()
-						.createBasicDescribedProgram(program.getProgramName(), codeFile, metadataFile);
-				AmstradProgramLoader loader = AmstradProgramLoaderFactory.getInstance()
-						.createStagedBasicProgramLoader(amstradPc);
-				loader.load(amstradProgram).run();
-			} catch (AmstradProgramException e) {
-				System.err.println(e);
-			}
+		protected void launchProgram(AudioTapeProgram tapeProgram) throws AmstradProgramException {
+			getAmstradPcPlugin().runStaged(tapeProgram);
 		}
 
 	}
 
-	private class AmstradPcTerminator extends WindowAdapter {
+	public static interface ToolBarListener {
 
-		public AmstradPcTerminator() {
-		}
+		void notifyModifiedSourceCodeSaved(AudioTapeProgram tapeProgram);
 
-		@Override
-		public void windowClosed(WindowEvent e) {
-			AmstradPc amstradPc = getAmstradPc();
-			if (amstradPc != null) {
-				amstradPc.terminate();
-				setAmstradPc(null);
-			}
-		}
-
-	}
-
-	private class AmstradMenuBarMakerImpl extends AmstradMenuBarMaker {
-
-		public AmstradMenuBarMakerImpl() {
-			super(AudioTapeIndexToolBar.this.getAmstradPc(), new AmstradMenuDefaultLookAndFeel());
-		}
-
-		@Override
-		protected AmstradMenuBar doCreateMenu() {
-			AmstradMenuBar menuBar = new AmstradMenuBar(getAmstradPc());
-			menuBar.add(createRestrictedFileMenu());
-			menuBar.add(createEmulatorMenu());
-			menuBar.add(createMonitorMenu());
-			menuBar.add(createWindowMenu());
-			return updateMenuBarLookAndFeel(menuBar);
-		}
-
-		protected JMenu createRestrictedFileMenu() {
-			// no browser setup, no file loading, no poweroff
-			JMenu menu = new JMenu("File");
-			menu.add(createProgramBrowserMenuItem());
-			menu.add(new JSeparator());
-			menu.add(createSaveBasicSourceFileMenuItem());
-			menu.add(createSaveBasicBinaryFileMenuItem());
-			menu.add(createSaveSnapshotFileMenuItem());
-			return updateMenuLookAndFeel(menu);
-		}
+		void notifyModifiedSourceCodeReverted(AudioTapeProgram tapeProgram);
 
 	}
 

@@ -1,15 +1,23 @@
 package org.maia.amstrad.io.tape.model;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.maia.amstrad.AmstradFactory;
 import org.maia.amstrad.basic.BasicSourceCode;
+import org.maia.amstrad.basic.locomotive.LocomotiveBasicSourceCode;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BytecodeAudioDecorator;
 import org.maia.amstrad.io.tape.decorate.SourcecodeBytecodeDecorator;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
 import org.maia.amstrad.io.tape.read.AudioFile;
+import org.maia.amstrad.program.AmstradProgram;
+import org.maia.amstrad.program.AmstradProgramException;
+import org.maia.io.util.IOUtils;
 
 public class AudioTapeProgram extends TapeProgram {
 
-	private BasicSourceCode sourceCode;
+	private BasicSourceCode sourceCodeOnTape;
 
 	private SourcecodeBytecodeDecorator sourceCodeDecorator;
 
@@ -21,17 +29,23 @@ public class AudioTapeProgram extends TapeProgram {
 
 	private TapeProfile profileOnTape;
 
+	private File fileStoringSourceCodeOnTape;
+
+	private File fileStoringModifiedSourceCode;
+
+	private File fileStoringProgramMetadata;
+
 	private AudioTapeProgram() {
 	}
 
-	public static AudioTapeProgram createFrom(TapeProgram program, BasicSourceCode sourceCode,
+	public static AudioTapeProgram createFrom(TapeProgram program, BasicSourceCode sourceCodeOnTape,
 			SourcecodeBytecodeDecorator sourceCodeDecorator, BytecodeAudioDecorator byteCodeDecorator,
 			AudioFile audioFile, AudioTapeBitDecorator audioDecorator, TapeProfile profileOnTape) {
 		AudioTapeProgram audioTapeProgram = new AudioTapeProgram();
 		for (Block block : program.getBlocks()) {
 			audioTapeProgram.addBlock(block);
 		}
-		audioTapeProgram.setSourceCode(sourceCode);
+		audioTapeProgram.setSourceCodeOnTape(sourceCodeOnTape);
 		audioTapeProgram.setSourceCodeDecorator(sourceCodeDecorator);
 		audioTapeProgram.setByteCodeDecorator(byteCodeDecorator);
 		audioTapeProgram.setAudioFile(audioFile);
@@ -40,12 +54,53 @@ public class AudioTapeProgram extends TapeProgram {
 		return audioTapeProgram;
 	}
 
-	public BasicSourceCode getSourceCode() {
-		return sourceCode;
+	public AmstradProgram asAmstradProgram() throws AmstradProgramException {
+		File codeFile = hasModifiedSourceCode() ? getFileStoringModifiedSourceCode() : getFileStoringSourceCodeOnTape();
+		File metadataFile = getFileStoringProgramMetadata();
+		return AmstradFactory.getInstance().createBasicDescribedProgram(getProgramName(), codeFile, metadataFile);
 	}
 
-	private void setSourceCode(BasicSourceCode sourceCode) {
-		this.sourceCode = sourceCode;
+	public void saveModifiedSourceCode(BasicSourceCode modifiedSourceCode) throws IOException {
+		IOUtils.writeTextFileContents(getFileStoringModifiedSourceCode(), modifiedSourceCode.getText());
+	}
+
+	public void revertSourceCodeModifications() {
+		if (hasModifiedSourceCode()) {
+			getFileStoringModifiedSourceCode().delete();
+		}
+	}
+
+	public boolean hasModifiedSourceCode() {
+		return getFileStoringModifiedSourceCode() != null && getFileStoringModifiedSourceCode().exists();
+	}
+
+	public BasicSourceCode getLatestSourceCode() {
+		if (hasModifiedSourceCode()) {
+			return getModifiedSourceCode();
+		} else {
+			return getSourceCodeOnTape();
+		}
+	}
+
+	public BasicSourceCode getModifiedSourceCode() {
+		BasicSourceCode modifiedSourceCode = null;
+		if (hasModifiedSourceCode()) {
+			try {
+				modifiedSourceCode = new LocomotiveBasicSourceCode(
+						IOUtils.readTextFileContents(getFileStoringModifiedSourceCode()));
+			} catch (Exception e) {
+				System.err.println(e);
+			}
+		}
+		return modifiedSourceCode;
+	}
+
+	public BasicSourceCode getSourceCodeOnTape() {
+		return sourceCodeOnTape;
+	}
+
+	private void setSourceCodeOnTape(BasicSourceCode sourceCodeOnTape) {
+		this.sourceCodeOnTape = sourceCodeOnTape;
 	}
 
 	public SourcecodeBytecodeDecorator getSourceCodeDecorator() {
@@ -86,6 +141,30 @@ public class AudioTapeProgram extends TapeProgram {
 
 	private void setProfileOnTape(TapeProfile profileOnTape) {
 		this.profileOnTape = profileOnTape;
+	}
+
+	public File getFileStoringSourceCodeOnTape() {
+		return fileStoringSourceCodeOnTape;
+	}
+
+	public void setFileStoringSourceCodeOnTape(File file) {
+		this.fileStoringSourceCodeOnTape = file;
+	}
+
+	public File getFileStoringModifiedSourceCode() {
+		return fileStoringModifiedSourceCode;
+	}
+
+	public void setFileStoringModifiedSourceCode(File file) {
+		this.fileStoringModifiedSourceCode = file;
+	}
+
+	public File getFileStoringProgramMetadata() {
+		return fileStoringProgramMetadata;
+	}
+
+	public void setFileStoringProgramMetadata(File file) {
+		this.fileStoringProgramMetadata = file;
 	}
 
 }

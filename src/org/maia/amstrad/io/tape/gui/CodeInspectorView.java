@@ -41,7 +41,7 @@ public class CodeInspectorView extends JPanel implements SourceCodeView.SourceCo
 	public CodeInspectorView(AudioTapeProgram audioTapeProgram) {
 		super(new BorderLayout());
 		this.audioTapeProgram = audioTapeProgram;
-		this.sourceCodeView = buildSourceCodeView(audioTapeProgram.getSourceCode());
+		this.sourceCodeView = buildSourceCodeView(audioTapeProgram.getSourceCodeOnTape());
 		this.byteCodeView = buildByteCodeView(audioTapeProgram.getByteCode());
 		this.audioPane = buildAudioPane();
 		buildView();

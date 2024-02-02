@@ -73,7 +73,6 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 		this.tapeDecorator = new TapeDecorator();
 		this.blockDecorator = new BlockAudioDecorator(tapeDecorator);
 		this.audioTapeBitDecorator = new AudioTapeBitDecorator();
-		this.saveByteCode = true;
 	}
 
 	public void readTape() throws Exception {
@@ -186,7 +185,7 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 			if (isSafeCharForProgramFolder(c))
 				sb.append(c);
 		}
-		return new File(getOutputDirectory(), sb.toString());
+		return new File(getOutputDirectory(), sb.toString().trim());
 	}
 
 	private boolean isSafeCharForProgramFolder(char c) {
@@ -195,10 +194,9 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 
 	private void saveMetaData(AudioTapeProgram program, File programFolder) {
 		MetaData md = getTaskConfiguration().getDefaultProgramMetaData();
+		File metadataFile = new File(programFolder, "INFO" + AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension());
 		try {
-			PrintWriter pw = new PrintWriter(
-					new File(programFolder, "INFO" + AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension()),
-					"UTF-8");
+			PrintWriter pw = new PrintWriter(metadataFile, "UTF-8");
 			pw.println(AMD_TYPE + ": " + AMD_TYPE_LOCOMOTIVE_BASIC_PROGRAM);
 			pw.println(AMD_NAME + ": " + program.getProgramName());
 			pw.println(AMD_AUTHOR + ": " + StringUtils.emptyForNull(md.getAuthor()));
@@ -209,26 +207,30 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 			pw.println(AMD_DESCRIPTION + ": " + StringUtils.emptyForNull(md.getDescription()));
 			pw.println(AMD_AUTHORING + ": " + StringUtils.emptyForNull(md.getAuthoring()));
 			pw.close();
+			program.setFileStoringProgramMetadata(metadataFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void saveSourceCode(AudioTapeProgram program, File programFolder) {
-		File sourceCodeFile = new File(programFolder,
-				"code" + AmstradFileType.BASIC_SOURCE_CODE_FILE.getFileExtension());
+		String extension = AmstradFileType.BASIC_SOURCE_CODE_FILE.getFileExtension();
+		File sourceCodeFile = new File(programFolder, "code" + extension);
 		try {
-			IOUtils.writeTextFileContents(sourceCodeFile, program.getSourceCode().getText());
+			IOUtils.writeTextFileContents(sourceCodeFile, program.getSourceCodeOnTape().getText());
+			program.setFileStoringSourceCodeOnTape(sourceCodeFile);
+			program.setFileStoringModifiedSourceCode(new File(programFolder, "code-remastered" + extension));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void saveByteCode(AudioTapeProgram program, File programFolder) {
+		String extension = AmstradFileType.BASIC_BYTE_CODE_FILE.getFileExtension();
+		File byteCodeFile = new File(programFolder, "bytecode" + extension);
 		ByteSequence byteCode = program.getByteCode();
 		try {
-			byteCode.save(
-					new File(programFolder, "bytecode" + AmstradFileType.BASIC_BYTE_CODE_FILE.getFileExtension()));
+			byteCode.save(byteCodeFile);
 			// byteCode.saveAsText(new File(programFolder, "bytecode.txt"));
 		} catch (IOException e) {
 			e.printStackTrace();
