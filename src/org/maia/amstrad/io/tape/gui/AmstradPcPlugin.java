@@ -1,8 +1,6 @@
 package org.maia.amstrad.io.tape.gui;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.Vector;
 
@@ -15,6 +13,7 @@ import org.maia.amstrad.basic.BasicSourceCode;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.pc.AmstradPc;
 import org.maia.amstrad.pc.AmstradPcFrame;
+import org.maia.amstrad.pc.AmstradPcFrameListener;
 import org.maia.amstrad.pc.action.AmstradPcAction;
 import org.maia.amstrad.pc.menu.AmstradMenuBar;
 import org.maia.amstrad.pc.menu.maker.AmstradMenuBarMaker;
@@ -86,21 +85,22 @@ public class AmstradPcPlugin {
 			amstradPc = AmstradFactory.getInstance().createAmstradPc();
 			setAmstradPc(amstradPc);
 			AmstradPcFrame frame = amstradPc.displayInFrame(false);
-			frame.addWindowListener(new WindowAdapter() {
+			frame.addFrameListener(new AmstradPcFrameListener() {
+
 				@Override
-				public void windowClosed(WindowEvent e) {
+				public void amstradPcFrameClosed(AmstradPcFrame arg0) {
 					closeAmstradPc();
 				}
 			});
 			if (mode != null)
 				amstradPc.getMonitor().setMode(mode);
-			amstradPc.start(true, false);
+			amstradPc.start();
 		} else {
 			boolean sameProgram = getProgramInAmstradPc() != null
 					&& getProgramInAmstradPc().getProgramName().equals(program.getProgramName());
 			if (mode != null && !sameProgram)
 				amstradPc.getMonitor().setMode(mode);
-			amstradPc.reboot(true, false);
+			amstradPc.reboot();
 		}
 		amstradPc.getFrame().setTitle(program.getProgramName());
 		amstradPc.getActions().getProgramInfoAction().updateProgram(program);
