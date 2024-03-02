@@ -1,7 +1,6 @@
 package org.maia.amstrad.io.tape.gui;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
 
@@ -171,11 +170,8 @@ public class AudioTapeIndexView extends JPanel implements ListSelectionListener 
 				if (programProfile != null) {
 					AudioRange range = programProfile.getAudioRange();
 					long samplePosition = col == 5 ? range.getSampleOffset() : range.getSampleEnd();
-					try {
-						int sampleRate = program.getAudioFile().getSampleRate();
-						value = UIResources.formatTimeOfAudioSamplePosition(samplePosition, sampleRate, false);
-					} catch (IOException e) {
-					}
+					int sampleRate = program.getAudioFile().getSampleRate();
+					value = UIResources.formatTimeOfAudioSamplePosition(samplePosition, sampleRate, false);
 				}
 			}
 			return value;

@@ -12,6 +12,9 @@ Results screen, featuring [Amstrad PC](https://github.com/jandebr/amstradPc) for
 Code inspection shows the lineage from source code over byte code to audio samples
 ![screenshot](https://github.com/jandebr/amstradTapeReader/blob/main/screenshots/screenshot2.png)
 
+Integrated code and metadata editor
+![screenshot](https://github.com/jandebr/amstradTapeReader/blob/main/screenshots/screenshot4.png)
+
 
 ## WAV file assumptions
 * Single audio channel (**mono track**)

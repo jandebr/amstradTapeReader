@@ -24,7 +24,7 @@ public class AudioFileProfileLegendView extends JPanel {
 
 	private Map<TapeSectionType, Color> createColorMap() {
 		Map<TapeSectionType, Color> cmap = new HashMap<TapeSectionType, Color>();
-		cmap.put(TapeSectionType.TAPE_BEGIN, new Color(20, 40, 20));
+		cmap.put(TapeSectionType.TAPE_BEGIN, new Color(14, 14, 28));
 		cmap.put(TapeSectionType.SILENCE, new Color(74, 119, 142));
 		cmap.put(TapeSectionType.SILENCE_BETWEEN_PROGRAMS, new Color(244, 217, 66));
 		cmap.put(TapeSectionType.HEADER, new Color(124, 234, 110));
@@ -32,7 +32,7 @@ public class AudioFileProfileLegendView extends JPanel {
 		cmap.put(TapeSectionType.HEADER_SPACER, new Color(200, 226, 197));
 		cmap.put(TapeSectionType.DATA, new Color(198, 85, 87));
 		cmap.put(TapeSectionType.DATA_RESIDUE, new Color(86, 36, 37));
-		cmap.put(TapeSectionType.TAPE_END, new Color(30, 30, 30));
+		cmap.put(TapeSectionType.TAPE_END, new Color(14, 14, 28));
 		return cmap;
 	}
 

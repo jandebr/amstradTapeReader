@@ -1,6 +1,5 @@
 package org.maia.amstrad.io.tape.decorate;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.maia.amstrad.io.tape.decorate.TapeDecorator.TapeSectionDecoration;
@@ -115,11 +114,7 @@ public class TapeDecorator extends SequenceDecorator<TapeSectionDecoration> impl
 	private long getLastPosition(TapeInputStream tape) {
 		long pos = 0L;
 		if (tape instanceof AudioTapeInputStream) {
-			try {
-				pos = ((AudioTapeInputStream) tape).getAudioFile().getNumberOfSamples();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			pos = ((AudioTapeInputStream) tape).getAudioFile().getNumberOfSamples();
 		}
 		return pos;
 	}

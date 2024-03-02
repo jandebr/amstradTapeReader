@@ -1,15 +1,22 @@
 package org.maia.amstrad.io.tape.gui;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.maia.amstrad.io.tape.gui.editor.ProgramEditorKit;
 import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration;
+import org.maia.swing.text.pte.PlainTextEditor;
+import org.maia.swing.text.pte.model.PlainTextFileDocument;
 
 public class TapeReaderApplicationViewer extends Viewer {
+
+	private static PlainTextEditor textEditor;
 
 	public TapeReaderApplicationViewer(TapeReaderApplicationView view) {
 		super(view, "Amstrad Tape Reader", true);
@@ -37,6 +44,24 @@ public class TapeReaderApplicationViewer extends Viewer {
 
 	public TapeReaderApplicationView getApplicationView() {
 		return (TapeReaderApplicationView) getView();
+	}
+
+	public static PlainTextEditor getTextEditor() {
+		if (textEditor == null) {
+			textEditor = createTextEditor();
+		}
+		return textEditor;
+	}
+
+	private static PlainTextEditor createTextEditor() {
+		PlainTextFileDocument.setFileNameExtensionFilter(
+				new FileNameExtensionFilter("Text files (*.txt, *.bas, *.amd)", "txt", "bas", "amd"));
+		// UIManager.put("TabbedPane.selected", Color.WHITE);
+		Dimension screenSize = UIFactory.getScreenSize();
+		Dimension editorSize = new Dimension((int) Math.floor(screenSize.getWidth() * 0.8),
+				(int) Math.floor(screenSize.getHeight() * 0.8));
+		PlainTextEditor editor = new PlainTextEditor(new ProgramEditorKit(), editorSize, true);
+		return editor;
 	}
 
 	@SuppressWarnings("serial")

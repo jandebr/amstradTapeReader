@@ -30,7 +30,7 @@ public class AmstradPcPlugin {
 
 	private AmstradPc amstradPc;
 
-	private AmstradProgram programInAmstradPc;
+	private AudioTapeProgram programInAmstradPc;
 
 	private List<AmstradPcListener> listeners;
 
@@ -45,6 +45,7 @@ public class AmstradPcPlugin {
 		AmstradProgramLoader loader = AmstradProgramLoaderFactory.getInstance()
 				.createOriginalBasicProgramLoader(amstradPc);
 		loader.load(program);
+		setProgramInAmstradPc(tapeProgram);
 	}
 
 	public synchronized void runStaged(AudioTapeProgram tapeProgram) throws AmstradProgramException {
@@ -54,6 +55,7 @@ public class AmstradPcPlugin {
 		AmstradProgramLoader loader = AmstradProgramLoaderFactory.getInstance()
 				.createStagedBasicProgramLoader(amstradPc, null, EndingBasicCodeDisclosure.HIDE_CODE, false);
 		loader.load(program).run();
+		setProgramInAmstradPc(tapeProgram);
 	}
 
 	public synchronized void closeAmstradPc() {
@@ -61,6 +63,13 @@ public class AmstradPcPlugin {
 		if (amstradPc != null) {
 			amstradPc.terminate();
 			setAmstradPc(null);
+		}
+	}
+
+	public void bringAmstradPcToFront() {
+		AmstradPc amstradPc = getAmstradPc();
+		if (amstradPc != null) {
+			amstradPc.getFrame().toFront();
 		}
 	}
 
@@ -104,7 +113,6 @@ public class AmstradPcPlugin {
 		}
 		amstradPc.getFrame().setTitle(program.getProgramName());
 		amstradPc.getActions().getProgramInfoAction().updateProgram(program);
-		setProgramInAmstradPc(program);
 		return amstradPc;
 	}
 
@@ -116,11 +124,11 @@ public class AmstradPcPlugin {
 		this.amstradPc = amstradPc;
 	}
 
-	private AmstradProgram getProgramInAmstradPc() {
+	public AudioTapeProgram getProgramInAmstradPc() {
 		return programInAmstradPc;
 	}
 
-	private void setProgramInAmstradPc(AmstradProgram program) {
+	private void setProgramInAmstradPc(AudioTapeProgram program) {
 		this.programInAmstradPc = program;
 	}
 

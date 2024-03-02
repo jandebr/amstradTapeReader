@@ -12,6 +12,7 @@ import java.util.Vector;
 
 import org.maia.amstrad.io.tape.model.AudioRange;
 import org.maia.amstrad.io.tape.read.AudioFile;
+import org.maia.amstrad.io.tape.read.AudioFileSubsampler;
 
 @SuppressWarnings("serial")
 public class AudioFileView extends AudioFilePositionSource {
@@ -30,24 +31,13 @@ public class AudioFileView extends AudioFilePositionSource {
 
 	public AudioFileView(AudioFile audioFile, int width, int height) throws IOException {
 		super(audioFile);
-		subsample(audioFile, width);
+		this.amplitudes = AudioFileSubsampler.getInstance().subsampleUnsigned(audioFile, width);
 		setSize(width, height);
 		setPreferredSize(getSize());
 		setBackground(Color.WHITE);
 		setForeground(new Color(20, 20, 20));
 		setupSelectionController();
 		this.selectionListeners = new Vector<SelectionListener>();
-	}
-
-	private void subsample(AudioFile audioFile, int n) throws IOException {
-		amplitudes = new short[n];
-		long samples = audioFile.getNumberOfSamples();
-		double f = n / (double) samples;
-		for (long si = 0; si < samples; si++) {
-			short s = audioFile.getAbsoluteSample(si);
-			int j = (int) Math.floor(si * f);
-			amplitudes[j] = (short) Math.max(amplitudes[j], s);
-		}
 	}
 
 	@Override
@@ -132,15 +122,11 @@ public class AudioFileView extends AudioFilePositionSource {
 		AudioRange selection = null;
 		SelectionOnView sov = getSelectionOnView();
 		if (sov != null) {
-			try {
-				double upperX = getWidthForDisplayRange() - 1;
-				long upperSample = getAudioFile().getNumberOfSamples() - 1L;
-				long sampleOffset = Math.round(sov.getMinX() / upperX * upperSample);
-				long sampleEnd = Math.round(sov.getMaxX() / upperX * upperSample);
-				selection = new AudioRange(sampleOffset, sampleEnd - sampleOffset + 1L);
-			} catch (IOException e) {
-				System.err.println(e);
-			}
+			double upperX = getWidthForDisplayRange() - 1;
+			long upperSample = getAudioFile().getNumberOfSamples() - 1L;
+			long sampleOffset = Math.round(sov.getMinX() / upperX * upperSample);
+			long sampleEnd = Math.round(sov.getMaxX() / upperX * upperSample);
+			selection = new AudioRange(sampleOffset, sampleEnd - sampleOffset + 1L);
 		}
 		return selection;
 	}
@@ -165,13 +151,9 @@ public class AudioFileView extends AudioFilePositionSource {
 
 	private int mapFilePositionToView(long pos) {
 		int x = -1;
-		try {
-			double upperX = getWidthForDisplayRange() - 1;
-			double upperSample = getAudioFile().getNumberOfSamples() - 1L;
-			x = (int) Math.round(pos / upperSample * upperX);
-		} catch (IOException e) {
-			System.err.println(e);
-		}
+		double upperX = getWidthForDisplayRange() - 1;
+		double upperSample = getAudioFile().getNumberOfSamples() - 1L;
+		x = (int) Math.round(pos / upperSample * upperX);
 		return x;
 	}
 

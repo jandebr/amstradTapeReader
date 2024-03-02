@@ -67,6 +67,14 @@ public class UIResources {
 
 	public static Icon clearSelectionIcon = loadIcon(iconFolder + "unselect32.png");
 
+	public static Icon metadataDocumentSmallIcon = loadIcon(iconFolder + "metadata-doc16.png");
+
+	public static Icon metadataDocumentLargeIcon = loadIcon(iconFolder + "metadata-doc32.png");
+
+	public static Icon sourceCodeDocumentSmallIcon = loadIcon(iconFolder + "code-doc16.png");
+
+	public static Icon sourceCodeDocumentLargeIcon = loadIcon(iconFolder + "code-doc32.png");
+
 	public static Dimension sourceCodeViewSize = new Dimension(1024, 600);
 
 	public static Dimension byteCodeViewSize = new Dimension(1024, 600);

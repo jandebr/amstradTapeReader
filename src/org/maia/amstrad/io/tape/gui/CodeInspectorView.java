@@ -246,12 +246,7 @@ public class CodeInspectorView extends JPanel implements SourceCodeView.SourceCo
 		}
 
 		private static AudioRange extendedRangeForDisplay(AudioRange range, AudioFile audioFile) {
-			long pmax = 0L;
-			try {
-				pmax = audioFile.getNumberOfSamples() - 1L;
-			} catch (IOException e) {
-				pmax = range.getSampleEnd();
-			}
+			long pmax = audioFile.getNumberOfSamples() - 1L;
 			long p0 = Math.max(0, range.getSampleOffset() - RANGE_EXTENSION / 2);
 			long p1 = Math.min(pmax, range.getSampleEnd() + RANGE_EXTENSION / 2);
 			return new AudioRange(p0, p1 - p0 + 1L);

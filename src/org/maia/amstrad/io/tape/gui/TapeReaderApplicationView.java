@@ -72,6 +72,7 @@ public class TapeReaderApplicationView extends JPanel {
 
 	private synchronized void updateResultsViewAsync() {
 		replaceCenterComponent(getReadingView());
+		TapeReaderApplicationViewer.getTextEditor().discardAllDocuments(); // fresh editor
 		new Thread(new Runnable() {
 
 			@Override

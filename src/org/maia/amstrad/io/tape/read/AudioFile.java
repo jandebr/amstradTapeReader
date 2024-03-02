@@ -10,7 +10,7 @@ public abstract class AudioFile {
 
 	private File sourceFile;
 
-	public AudioFile(File sourceFile) {
+	protected AudioFile(File sourceFile) {
 		this.sourceFile = sourceFile;
 	}
 
@@ -20,14 +20,19 @@ public abstract class AudioFile {
 
 	public abstract void close() throws IOException;
 
-	public abstract int getSampleRate() throws IOException;
+	public abstract int getSampleRate();
 
-	public abstract long getNumberOfSamples() throws IOException;
+	public abstract long getNumberOfSamples();
 
 	public abstract short getSample(long index) throws IOException;
 
 	public short getAbsoluteSample(long index) throws IOException {
-		return (short) Math.abs(getSample(index));
+		short sample = getSample(index);
+		if (sample >= 0) {
+			return sample;
+		} else {
+			return (short) -sample;
+		}
 	}
 
 	public File getSourceFile() {

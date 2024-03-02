@@ -10,7 +10,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -21,6 +20,7 @@ import org.maia.amstrad.io.tape.model.profile.TapeProfile;
 import org.maia.amstrad.io.tape.model.profile.TapeSection;
 import org.maia.amstrad.io.tape.model.profile.TapeSectionType;
 import org.maia.amstrad.io.tape.read.AudioFile;
+import org.maia.amstrad.io.tape.read.AudioFileSubsampler;
 
 @SuppressWarnings("serial")
 public class AudioFileProfileView extends AudioFilePositionSource implements MouseListener {
@@ -48,11 +48,33 @@ public class AudioFileProfileView extends AudioFilePositionSource implements Mou
 		this.legend = legend;
 		this.sectionRanges = new HashMap<TapeSection, SectionRange>();
 		this.sectionListeners = new Vector<TapeSectionListener>();
-		subsample(audioFile, displayProfile, width);
+		this.amplitudes = AudioFileSubsampler.getInstance().subsampleUnsigned(audioFile, width);
+		this.sections = projectSections(audioFile, displayProfile, width);
 		setSize(width, height);
 		setPreferredSize(getSize());
 		setBackground(Color.BLACK);
 		addMouseListener(this);
+	}
+
+	private TapeSection[] projectSections(AudioFile audioFile, TapeProfile profile, int length) throws IOException {
+		TapeSection[] sections = new TapeSection[length];
+		long ns = audioFile.getNumberOfSamples();
+		double f = length / (double) ns;
+		for (TapeSection section : profile.getSections()) {
+			int x0 = (int) Math.floor(section.getStartPosition() * f);
+			int x1 = (int) Math.floor(section.getEndPosition() * f);
+			for (int x = x0; x <= x1; x++) {
+				sections[x] = section;
+				SectionRange range = getSectionRanges().get(section);
+				if (range == null) {
+					range = new SectionRange(section, x, x);
+					getSectionRanges().put(section, range);
+				} else {
+					range.extendToInclude(x);
+				}
+			}
+		}
+		return sections;
 	}
 
 	public void addSectionListener(TapeSectionListener listener) {
@@ -61,36 +83,6 @@ public class AudioFileProfileView extends AudioFilePositionSource implements Mou
 
 	public void removeSectionListener(TapeSectionListener listener) {
 		getSectionListeners().remove(listener);
-	}
-
-	private void subsample(AudioFile audioFile, TapeProfile profile, int n) throws IOException {
-		amplitudes = new short[n];
-		sections = new TapeSection[n];
-		Iterator<TapeSection> sectionIterator = profile.getSections().iterator();
-		TapeSection currentSection = sectionIterator.hasNext() ? sectionIterator.next() : null;
-		long samples = audioFile.getNumberOfSamples();
-		double f = n / (double) samples;
-		for (long si = 0; si < samples; si++) {
-			// Advance current section
-			while (currentSection != null && currentSection.getEndPosition() < si && sectionIterator.hasNext())
-				currentSection = sectionIterator.next();
-			if (currentSection != null && currentSection.getEndPosition() < si)
-				currentSection = null;
-			// Subsample
-			short s = audioFile.getAbsoluteSample(si);
-			int j = (int) Math.floor(si * f);
-			amplitudes[j] = (short) Math.max(amplitudes[j], s);
-			sections[j] = currentSection;
-			if (currentSection != null) {
-				SectionRange range = getSectionRanges().get(currentSection);
-				if (range == null) {
-					range = new SectionRange(currentSection, j, j);
-					getSectionRanges().put(currentSection, range);
-				} else {
-					range.extendToInclude(j);
-				}
-			}
-		}
 	}
 
 	@Override

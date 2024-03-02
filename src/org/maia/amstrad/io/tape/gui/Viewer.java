@@ -3,7 +3,6 @@ package org.maia.amstrad.io.tape.gui;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 
 import javax.swing.ImageIcon;
@@ -76,7 +75,7 @@ public class Viewer {
 
 	public void centerOnScreen() {
 		if (getFrame() != null) {
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			Dimension screenSize = UIFactory.getScreenSize();
 			getFrame().setLocation(
 					new Point((screenSize.width - frame.getWidth()) / 2, (screenSize.height - frame.getHeight()) / 2));
 		}

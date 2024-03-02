@@ -3,7 +3,6 @@ package org.maia.amstrad.io.tape.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.JComponent;
@@ -114,8 +113,7 @@ public class ByteCodeView extends JPanel {
 			try {
 				int offset = mapDocumentOffset(getByteCodeSelection().getByteCodeOffset());
 				Rectangle2D r = getByteCodePane().modelToView2D(offset);
-				getByteCodePane().scrollRectToVisible(new Rectangle((int) Math.floor(r.getMinX()),
-						(int) Math.floor(r.getMinY()), (int) Math.ceil(r.getWidth()), (int) Math.ceil(r.getHeight())));
+				getByteCodePane().scrollRectToVisible(r.getBounds());
 			} catch (BadLocationException e) {
 				e.printStackTrace();
 			}

@@ -8,7 +8,6 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Vector;
@@ -134,7 +133,7 @@ public class TapeReaderTaskConfigurator extends JPanel implements SelectionListe
 						if (getOutputDirectoryField().isCleared()) {
 							getOutputDirectoryField().setCurrentDirectory(inputField.getFile().getParentFile());
 						}
-					} catch (FileNotFoundException e) {
+					} catch (IOException e) {
 						System.err.println(e);
 					}
 				}

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -21,8 +22,15 @@ import javax.swing.SwingConstants;
 
 import org.maia.amstrad.io.tape.gui.AmstradPcPlugin.AmstradPcListener;
 import org.maia.amstrad.io.tape.gui.AudioTapeIndexView.IndexSelectionListener;
+import org.maia.amstrad.io.tape.gui.editor.ProgramMetadataDocument;
+import org.maia.amstrad.io.tape.gui.editor.ProgramSourceCodeDocument;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.program.AmstradProgramException;
+import org.maia.swing.text.pte.PlainTextDocumentEditor;
+import org.maia.swing.text.pte.PlainTextDocumentEditorAdapter;
+import org.maia.swing.text.pte.PlainTextDocumentException;
+import org.maia.swing.text.pte.PlainTextEditor;
+import org.maia.swing.text.pte.model.PlainTextDocument;
 
 @SuppressWarnings("serial")
 public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener, AmstradPcListener {
@@ -92,8 +100,8 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 	public void indexSelectionUpdate(AudioTapeIndexView source) {
 		boolean programSelection = getSelectedProgram() != null;
 		getCodeInspectorAction().setEnabled(programSelection);
-		// TODO getCodeEditAction().setEnabled(programSelection);
-		// TODO getMetadataEditAction().setEnabled(programSelection);
+		getCodeEditAction().setEnabled(programSelection);
+		getMetadataEditAction().setEnabled(programSelection);
 		getProgramLoadAction().setEnabled(programSelection);
 		getProgramRunAction().setEnabled(programSelection);
 		getClearSelectionAction().setEnabled(programSelection);
@@ -107,7 +115,9 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 
 	@Override
 	public void notifyModifiedSourceCodeSaved(AudioTapeProgram tapeProgram) {
-		fireModifiedSourceCodeSaved(tapeProgram); // propagate
+		// modified inside AmstradPc
+		fireModifiedSourceCodeSaved(tapeProgram); // propagate to index view
+		updateSourceCodeInEditor(tapeProgram, false);
 		updateCodeRevertEnablement();
 	}
 
@@ -121,6 +131,34 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 		for (ToolBarListener listener : getListeners()) {
 			listener.notifyModifiedSourceCodeReverted(tapeProgram);
 		}
+	}
+
+	private void updateSourceCodeInEditor(AudioTapeProgram tapeProgram, boolean discardEdits) {
+		PlainTextDocumentEditor documentEditor = getProgramSourceCodeEditor(tapeProgram);
+		if (documentEditor != null && (discardEdits || !documentEditor.isTextChangedSinceLastSave())) {
+			try {
+				documentEditor.revert(false);
+			} catch (PlainTextDocumentException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private PlainTextDocumentEditor getProgramSourceCodeEditor(AudioTapeProgram tapeProgram) {
+		for (Iterator<PlainTextDocumentEditor> it = getTextEditor().getDocumentEditorsIterator(); it.hasNext();) {
+			PlainTextDocumentEditor documentEditor = it.next();
+			PlainTextDocument document = documentEditor.getDocument();
+			if (document instanceof ProgramSourceCodeDocument) {
+				if (((ProgramSourceCodeDocument) document).getProgram().equals(tapeProgram)) {
+					return documentEditor;
+				}
+			}
+		}
+		return null;
+	}
+
+	private PlainTextEditor getTextEditor() {
+		return TapeReaderApplicationViewer.getTextEditor();
 	}
 
 	public AudioTapeProgram getSelectedProgram() {
@@ -262,14 +300,48 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 			AudioTapeProgram tapeProgram = getSelectedProgram();
 			if (tapeProgram != null) {
 				tapeProgram.revertSourceCodeModifications();
-				fireModifiedSourceCodeReverted(tapeProgram);
+				fireModifiedSourceCodeReverted(tapeProgram); // propagate to index view
+				updateSourceCodeInEditor(tapeProgram, true);
+				if (tapeProgram.equals(getAmstradPcPlugin().getProgramInAmstradPc())) {
+					getAmstradPcPlugin().closeAmstradPc();
+				}
 				updateCodeRevertEnablement();
 			}
 		}
 
 	}
 
-	private class CodeEditAction extends ProgramAction {
+	private abstract class ProgramEditorAction extends ProgramAction {
+
+		protected ProgramEditorAction(String name, Icon icon) {
+			super(name, icon);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent event) {
+			AudioTapeProgram tapeProgram = getSelectedProgram();
+			if (tapeProgram != null) {
+				PlainTextEditor editor = getTextEditor();
+				PlainTextDocument document = createDocument(tapeProgram);
+				editor.showInFrame("", false, false);
+				try {
+					PlainTextDocumentEditor documentEditor = editor.openDocument(document);
+					handleDocumentOpened(documentEditor);
+				} catch (PlainTextDocumentException error) {
+					editor.showErrorMessageDialog("Error", "Error while opening document", error);
+				}
+			}
+		}
+
+		protected abstract PlainTextDocument createDocument(AudioTapeProgram tapeProgram);
+
+		protected void handleDocumentOpened(PlainTextDocumentEditor documentEditor) {
+			// Handle for subclasses
+		}
+
+	}
+
+	private class CodeEditAction extends ProgramEditorAction {
 
 		public CodeEditAction() {
 			super(UIResources.editCodeLabel, UIResources.editCodeIcon);
@@ -277,13 +349,30 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 		}
 
 		@Override
-		public void actionPerformed(ActionEvent event) {
-			// TODO
+		protected PlainTextDocument createDocument(AudioTapeProgram tapeProgram) {
+			return new ProgramSourceCodeDocument(tapeProgram);
+		}
+
+		@Override
+		protected void handleDocumentOpened(PlainTextDocumentEditor documentEditor) {
+			super.handleDocumentOpened(documentEditor);
+			documentEditor.addListener(new PlainTextDocumentEditorAdapter() {
+
+				@Override
+				public void documentSaved(PlainTextDocumentEditor documentEditor) {
+					AudioTapeProgram tapeProgram = ((ProgramSourceCodeDocument) documentEditor.getDocument())
+							.getProgram();
+					fireModifiedSourceCodeSaved(tapeProgram); // propagate to index view
+					updateCodeRevertEnablement();
+					// note: leave code in AmstradPc as-is
+				}
+
+			});
 		}
 
 	}
 
-	private class MetadataEditAction extends ProgramAction {
+	private class MetadataEditAction extends ProgramEditorAction {
 
 		public MetadataEditAction() {
 			super(UIResources.editMetadataLabel, UIResources.editMetadataIcon);
@@ -291,8 +380,8 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 		}
 
 		@Override
-		public void actionPerformed(ActionEvent event) {
-			// TODO
+		protected PlainTextDocument createDocument(AudioTapeProgram tapeProgram) {
+			return new ProgramMetadataDocument(tapeProgram);
 		}
 
 	}
@@ -337,6 +426,7 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 		@Override
 		protected void launchProgram(AudioTapeProgram tapeProgram) throws AmstradProgramException {
 			getAmstradPcPlugin().load(tapeProgram);
+			getAmstradPcPlugin().bringAmstradPcToFront();
 		}
 
 	}
@@ -351,6 +441,7 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 		@Override
 		protected void launchProgram(AudioTapeProgram tapeProgram) throws AmstradProgramException {
 			getAmstradPcPlugin().runStaged(tapeProgram);
+			getAmstradPcPlugin().bringAmstradPcToFront();
 		}
 
 	}
