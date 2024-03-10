@@ -63,8 +63,7 @@ public class ProgramEditorMenuMaker extends PlainTextEditorDefaultMenuMaker impl
 		menu.add(createMetadataInsertControlsMenu(programActions));
 		menu.add(createMetadataInsertImagesMenu(programActions));
 		menu.add(createMetadataInsertFileRefsMenu(programActions));
-		menu.add(decorateForMenu(createInsertTextMenuItem("Flags", formatMetadatum(AMD_FLAGS), programActions)));
-		menu.add(createMetadataInsertFlagMenu(programActions));
+		menu.add(createMetadataInsertFlagsMenu(programActions));
 		return menu;
 	}
 
@@ -90,29 +89,29 @@ public class ProgramEditorMenuMaker extends PlainTextEditorDefaultMenuMaker impl
 		JMenu menu = new JMenu("Controls");
 		menu.add(decorateForMenu(createInsertTextMenuItem("Heading",
 				formatMetadatum(AMD_CONTROLS_PREFIX + "[#]" + AMD_CONTROLS_SUFFIX_HEADING), programActions)));
-		menu.add(decorateForMenu(createInsertTextMenuItem("Key",
-				formatMetadatum(AMD_CONTROLS_PREFIX + "[#]" + AMD_CONTROLS_SUFFIX_KEY), programActions)));
-		menu.add(decorateForMenu(createInsertTextMenuItem("Description",
-				formatMetadatum(AMD_CONTROLS_PREFIX + "[#]" + AMD_CONTROLS_SUFFIX_DESCRIPTION), programActions)));
+		menu.add(decorateForMenu(createInsertTextMenuItem("Control",
+				formatMetadatum(AMD_CONTROLS_PREFIX + "[#]" + AMD_CONTROLS_SUFFIX_KEY) + "\n"
+						+ formatMetadatum(AMD_CONTROLS_PREFIX + "[#]" + AMD_CONTROLS_SUFFIX_DESCRIPTION),
+				programActions)));
 		return menu;
 	}
 
 	protected JMenu createMetadataInsertImagesMenu(ProgramEditorActions programActions) {
 		JMenu menu = new JMenu("Images");
-		menu.add(decorateForMenu(createInsertTextMenuItem("Image reference",
-				formatMetadatum(AMD_IMAGES_PREFIX + "[#]" + AMD_IMAGES_SUFFIX_FILEREF, "$.png"), programActions)));
-		menu.add(decorateForMenu(createInsertTextMenuItem("Image caption",
-				formatMetadatum(AMD_IMAGES_PREFIX + "[#]" + AMD_IMAGES_SUFFIX_CAPTION), programActions)));
+		menu.add(decorateForMenu(createInsertTextMenuItem(
+				"Image reference", formatMetadatum(AMD_IMAGES_PREFIX + "[#]" + AMD_IMAGES_SUFFIX_FILEREF, "$.png")
+						+ "\n" + formatMetadatum(AMD_IMAGES_PREFIX + "[#]" + AMD_IMAGES_SUFFIX_CAPTION),
+				programActions)));
 		menu.add(decorateForMenu(
 				createInsertTextMenuItem("Cover image", formatMetadatum(AMD_COVER_IMAGE, "$.png"), programActions)));
 		return menu;
 	}
 
 	protected JMenu createMetadataInsertFileRefsMenu(ProgramEditorActions programActions) {
-		JMenu menu = new JMenu("File references");
-		menu.add(decorateForMenu(createInsertTextMenuItem("File",
+		JMenu menu = new JMenu("Files");
+		menu.add(decorateForMenu(createInsertTextMenuItem("File reference",
 				formatMetadatum(AMD_FILEREFS_PREFIX + "[$source]", "$target"), programActions)));
-		menu.add(decorateForMenu(createInsertTextMenuItem("Program",
+		menu.add(decorateForMenu(createInsertTextMenuItem("Program reference",
 				formatMetadatum(AMD_FILEREFS_PREFIX + "[$source]", "$.bas"), programActions)));
 		menu.add(decorateForMenu(createInsertTextMenuItem("Program described by",
 				formatMetadatum(AMD_FILEREFS_PREFIX + "[$source]", "$.bas " + AMD_FILEREFS_DESCRIBED_BY + " $.amd"),
@@ -120,17 +119,23 @@ public class ProgramEditorMenuMaker extends PlainTextEditorDefaultMenuMaker impl
 		return menu;
 	}
 
-	protected JMenu createMetadataInsertFlagMenu(ProgramEditorActions programActions) {
-		JMenu menu = new JMenu("Flag");
-		menu.add(decorateForMenu(createInsertTextMenuItem("Hide", AMD_FLAG_HIDE + ",", programActions)));
-		menu.add(decorateForMenu(createInsertTextMenuItem("No launch", AMD_FLAG_NOLAUNCH + ",", programActions)));
-		menu.add(decorateForMenu(createInsertTextMenuItem("No stage", AMD_FLAG_NOSTAGE + ",", programActions)));
+	protected JMenu createMetadataInsertFlagsMenu(ProgramEditorActions programActions) {
+		JMenu menu = new JMenu("Flags");
+		menu.add(decorateForMenu(createInsertFlagMenuItem("Hide", AMD_FLAG_HIDE, programActions)));
+		menu.add(decorateForMenu(createInsertFlagMenuItem("No launch", AMD_FLAG_NOLAUNCH, programActions)));
+		menu.add(decorateForMenu(createInsertFlagMenuItem("No stage", AMD_FLAG_NOSTAGE, programActions)));
+		menu.add(decorateForMenu(createInsertFlagMenuItem("No direct joystick", AMD_FLAG_NODIRECTJOY, programActions)));
 		return menu;
 	}
 
 	protected JMenuItem createInsertTextMenuItem(String name, String textToInsert,
 			ProgramEditorActions programActions) {
 		JMenuItem menuItem = new JMenuItem(programActions.getInsertTextAction(name, textToInsert));
+		return menuItem;
+	}
+
+	protected JMenuItem createInsertFlagMenuItem(String name, String flag, ProgramEditorActions programActions) {
+		JMenuItem menuItem = new JMenuItem(programActions.getInsertMetadataFlagAction(name, flag));
 		return menuItem;
 	}
 
