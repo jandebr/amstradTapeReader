@@ -4,8 +4,8 @@ import java.awt.Window;
 import java.util.List;
 import java.util.Vector;
 
+import org.maia.amstrad.io.tape.config.TapeReaderTaskConfiguration;
 import org.maia.amstrad.io.tape.gui.config.TapeReaderTaskConfigurator.StateListener;
-import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration;
 import org.maia.swing.dialog.ActionableDialog;
 import org.maia.swing.dialog.ActionableDialogOption;
 

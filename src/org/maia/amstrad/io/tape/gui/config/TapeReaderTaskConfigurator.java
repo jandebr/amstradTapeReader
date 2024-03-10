@@ -27,12 +27,12 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.maia.amstrad.io.tape.config.TapeReaderTaskConfiguration;
 import org.maia.amstrad.io.tape.gui.AudioFileExtendedView;
 import org.maia.amstrad.io.tape.gui.AudioFileView;
 import org.maia.amstrad.io.tape.gui.AudioFileView.SelectionListener;
 import org.maia.amstrad.io.tape.gui.UIResources;
 import org.maia.amstrad.io.tape.model.AudioRange;
-import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration;
 import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioWaveFile;
 import org.maia.amstrad.pc.monitor.AmstradMonitorMode;

@@ -13,9 +13,9 @@ import javax.swing.SwingUtilities;
 
 import org.maia.amstrad.AmstradFactory;
 import org.maia.amstrad.io.tape.TapeReaderTask;
+import org.maia.amstrad.io.tape.config.TapeReaderTaskConfiguration;
+import org.maia.amstrad.io.tape.config.TapeReaderTaskConfigurationIO;
 import org.maia.amstrad.io.tape.gui.config.TapeReaderTaskConfiguratorDialog;
-import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration;
-import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfigurationIO;
 import org.maia.swing.dialog.ActionableDialog;
 import org.maia.swing.dialog.ActionableDialogAdapter;
 

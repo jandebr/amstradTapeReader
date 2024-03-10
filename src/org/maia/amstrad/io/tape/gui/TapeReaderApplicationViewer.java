@@ -9,8 +9,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.maia.amstrad.io.tape.config.TapeReaderTaskConfiguration;
 import org.maia.amstrad.io.tape.gui.editor.ProgramEditorKit;
-import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration;
 import org.maia.swing.text.pte.PlainTextEditor;
 import org.maia.swing.text.pte.model.PlainTextFileDocument;
 

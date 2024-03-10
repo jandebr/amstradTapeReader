@@ -8,10 +8,10 @@ import java.io.IOException;
 import javax.swing.JComponent;
 
 import org.maia.amstrad.basic.BasicSourceCode;
+import org.maia.amstrad.io.tape.config.TapeReaderTaskConfigurationIO;
 import org.maia.amstrad.io.tape.model.AudioTapeIndex;
 import org.maia.amstrad.io.tape.model.AudioTapeProgram;
 import org.maia.amstrad.io.tape.model.ByteSequence;
-import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfigurationIO;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
 import org.maia.amstrad.io.tape.read.AudioFile;
 

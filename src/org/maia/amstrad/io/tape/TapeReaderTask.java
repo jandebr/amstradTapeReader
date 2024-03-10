@@ -11,6 +11,7 @@ import org.maia.amstrad.basic.BasicByteCode;
 import org.maia.amstrad.basic.BasicException;
 import org.maia.amstrad.basic.BasicSourceCode;
 import org.maia.amstrad.basic.locomotive.LocomotiveBasicByteCode;
+import org.maia.amstrad.io.tape.config.TapeReaderTaskConfiguration;
 import org.maia.amstrad.io.tape.decorate.AudioTapeBitDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator;
 import org.maia.amstrad.io.tape.decorate.BlockAudioDecorator.BlockAudioDecoration;
@@ -26,17 +27,15 @@ import org.maia.amstrad.io.tape.model.Block;
 import org.maia.amstrad.io.tape.model.BlockData;
 import org.maia.amstrad.io.tape.model.ByteSequence;
 import org.maia.amstrad.io.tape.model.TapeProgram;
-import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration;
-import org.maia.amstrad.io.tape.model.config.TapeReaderTaskConfiguration.MetaData;
+import org.maia.amstrad.io.tape.model.TapeProgramMetaData;
 import org.maia.amstrad.io.tape.model.profile.TapeProfile;
 import org.maia.amstrad.io.tape.read.AudioFile;
 import org.maia.amstrad.io.tape.read.AudioTapeInputStream;
 import org.maia.amstrad.io.tape.read.ScopedAudioTapeInputStream;
 import org.maia.amstrad.io.tape.read.TapeReader;
 import org.maia.amstrad.io.tape.read.TapeReaderListener;
-import org.maia.amstrad.program.AmstradProgramMetaDataConstants;
+import org.maia.amstrad.io.tape.write.TapeProgramMetaDataWriter;
 import org.maia.io.util.IOUtils;
-import org.maia.util.StringUtils;
 
 /**
  * Task that reconstructs programs from an Amstrad audio tape file
@@ -46,7 +45,7 @@ import org.maia.util.StringUtils;
  * inspected via {@link #getTapeIndex()} and {@link #getTapeProfile()}.
  * </p>
  */
-public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDataConstants {
+public class TapeReaderTask implements TapeReaderListener {
 
 	private TapeReaderTaskConfiguration taskConfiguration;
 
@@ -193,21 +192,11 @@ public class TapeReaderTask implements TapeReaderListener, AmstradProgramMetaDat
 	}
 
 	private void saveMetaData(AudioTapeProgram program, File programFolder) {
-		MetaData md = getTaskConfiguration().getDefaultProgramMetaData();
-		File metadataFile = new File(programFolder, "INFO" + AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension());
+		TapeProgramMetaData metaData = getTaskConfiguration().getDefaultProgramMetaData();
+		File metaDataFile = new File(programFolder, "INFO" + AmstradFileType.AMSTRAD_METADATA_FILE.getFileExtension());
 		try {
-			PrintWriter pw = new PrintWriter(metadataFile, "UTF-8");
-			pw.println(AMD_TYPE + ": " + AMD_TYPE_LOCOMOTIVE_BASIC_PROGRAM);
-			pw.println(AMD_NAME + ": " + program.getProgramName());
-			pw.println(AMD_AUTHOR + ": " + StringUtils.emptyForNull(md.getAuthor()));
-			pw.println(AMD_YEAR + ": " + StringUtils.emptyForNull(md.getYear()));
-			pw.println(AMD_TAPE + ": " + StringUtils.emptyForNull(md.getTape()));
-			pw.println(AMD_BLOCKS + ": " + program.getNumberOfBlocks());
-			pw.println(AMD_MONITOR + ": " + StringUtils.emptyForNull(md.getMonitor()));
-			pw.println(AMD_DESCRIPTION + ": " + StringUtils.emptyForNull(md.getDescription()));
-			pw.println(AMD_AUTHORING + ": " + StringUtils.emptyForNull(md.getAuthoring()));
-			pw.close();
-			program.setFileStoringProgramMetadata(metadataFile);
+			new TapeProgramMetaDataWriter().writeMetaData(metaData, program, metaDataFile);
+			program.setFileStoringProgramMetadata(metaDataFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
