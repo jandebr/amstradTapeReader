@@ -177,8 +177,9 @@ public class TapeReaderTask implements TapeReaderListener {
 	}
 
 	private File getProgramFolder(AudioTapeProgram program, int programIndex) {
+		int absoluteIndex = getTaskConfiguration().getProgramFolderNumberOffset() + programIndex;
 		StringBuilder sb = new StringBuilder(20);
-		sb.append(programFolderNumberFormat.format(programIndex + 1)).append('_');
+		sb.append(programFolderNumberFormat.format(absoluteIndex)).append('_');
 		for (int i = 0; i < program.getProgramName().length(); i++) {
 			char c = program.getProgramName().charAt(i);
 			if (isSafeCharForProgramFolder(c))

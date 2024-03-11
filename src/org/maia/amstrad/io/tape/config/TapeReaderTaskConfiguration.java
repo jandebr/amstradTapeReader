@@ -14,6 +14,10 @@ public class TapeReaderTaskConfiguration implements Cloneable {
 
 	private File outputDirectory; // root directory for all generated program folders
 
+	private boolean cleanupOutputDirectory; // start with a clean output directory (use cautiously)
+
+	private int programFolderNumberOffset = 1; // prefix number of the first generated program folder
+
 	private TapeProgramMetaData defaultProgramMetaData;
 
 	public TapeReaderTaskConfiguration() {
@@ -25,6 +29,8 @@ public class TapeReaderTaskConfiguration implements Cloneable {
 		TapeReaderTaskConfiguration clone = new TapeReaderTaskConfiguration();
 		clone.setAudioFile(getAudioFile());
 		clone.setOutputDirectory(getOutputDirectory());
+		clone.setCleanupOutputDirectory(isCleanupOutputDirectory());
+		clone.setProgramFolderNumberOffset(getProgramFolderNumberOffset());
 		clone.setSelectionInAudioFile(getSelectionInAudioFile());
 		clone.setDefaultProgramMetaData(getDefaultProgramMetaData().clone());
 		return clone;
@@ -54,6 +60,22 @@ public class TapeReaderTaskConfiguration implements Cloneable {
 		if (outputDirectory != null && !outputDirectory.isDirectory())
 			throw new IllegalArgumentException("Not a directory");
 		this.outputDirectory = outputDirectory;
+	}
+
+	public boolean isCleanupOutputDirectory() {
+		return cleanupOutputDirectory;
+	}
+
+	public void setCleanupOutputDirectory(boolean cleanup) {
+		this.cleanupOutputDirectory = cleanup;
+	}
+
+	public int getProgramFolderNumberOffset() {
+		return programFolderNumberOffset;
+	}
+
+	public void setProgramFolderNumberOffset(int offset) {
+		this.programFolderNumberOffset = offset;
 	}
 
 	public TapeProgramMetaData getDefaultProgramMetaData() {

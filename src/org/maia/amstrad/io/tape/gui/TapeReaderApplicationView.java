@@ -56,10 +56,35 @@ public class TapeReaderApplicationView extends JPanel {
 		dialog.setVisible(true);
 	}
 
+	private void cleanupOutputDirectory() {
+		TapeReaderTaskConfiguration cfg = getTaskConfiguration();
+		if (cfg != null) {
+			File dir = cfg.getOutputDirectory();
+			if (dir != null) {
+				cleanupRecursively(dir);
+				dir.mkdirs();
+			}
+		}
+	}
+
+	private void cleanupRecursively(File file) {
+		if (file.exists()) {
+			if (file.isDirectory()) {
+				for (File child : file.listFiles()) {
+					cleanupRecursively(child);
+				}
+			}
+			file.delete();
+		}
+	}
+
 	private AudioTapeIndexExtendedView createResultsView(int maxWidth) throws Exception {
 		AudioTapeIndexExtendedView view = null;
 		TapeReaderTaskConfiguration cfg = getTaskConfiguration();
 		if (cfg != null && cfg.getAudioFile() != null && cfg.getOutputDirectory() != null) {
+			if (cfg.isCleanupOutputDirectory()) {
+				cleanupOutputDirectory();
+			}
 			AmstradFactory.getInstance().getAmstradContext().setProgramRepositoryRootFolder(cfg.getOutputDirectory());
 			TapeReaderTask task = new TapeReaderTask(cfg);
 			task.readTape();

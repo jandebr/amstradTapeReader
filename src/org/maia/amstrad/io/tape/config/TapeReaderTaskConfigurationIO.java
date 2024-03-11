@@ -24,6 +24,10 @@ public class TapeReaderTaskConfigurationIO implements AmstradProgramMetaDataCons
 
 	private static final String KEY_OUTPUT_DIRECTORY = "outputDirectory";
 
+	private static final String KEY_PROGRAM_FOLDER_NUMBER_OFFSET = "programFolderNumberOffset";
+
+	private static final String KEY_CLEANUP_OUTPUT_DIRECTORY = "cleanupOutputDirectory";
+
 	private static final String KEY_METADATA = "metadata";
 
 	private static final String KEY_METADATA_AUTHOR = KEY_METADATA + "." + AMD_AUTHOR.toLowerCase();
@@ -85,6 +89,8 @@ public class TapeReaderTaskConfigurationIO implements AmstradProgramMetaDataCons
 		if (cfg.getOutputDirectory() != null) {
 			props.setProperty(KEY_OUTPUT_DIRECTORY, cfg.getOutputDirectory().getAbsolutePath());
 		}
+		props.setProperty(KEY_CLEANUP_OUTPUT_DIRECTORY, String.valueOf(cfg.isCleanupOutputDirectory()));
+		props.setProperty(KEY_PROGRAM_FOLDER_NUMBER_OFFSET, String.valueOf(cfg.getProgramFolderNumberOffset()));
 		props.putAll(toProperties(cfg.getDefaultProgramMetaData()));
 		return props;
 	}
@@ -127,6 +133,14 @@ public class TapeReaderTaskConfigurationIO implements AmstradProgramMetaDataCons
 			File dir = new File(path);
 			if (dir.exists() || dir.mkdirs()) {
 				cfg.setOutputDirectory(dir);
+			}
+		}
+		cfg.setCleanupOutputDirectory(Boolean.parseBoolean(props.getProperty(KEY_CLEANUP_OUTPUT_DIRECTORY)));
+		String offset = props.getProperty(KEY_PROGRAM_FOLDER_NUMBER_OFFSET);
+		if (offset != null) {
+			try {
+				cfg.setProgramFolderNumberOffset(Integer.parseInt(offset));
+			} catch (NumberFormatException e) {
 			}
 		}
 		cfg.setDefaultProgramMetaData(extractMetaData(props));

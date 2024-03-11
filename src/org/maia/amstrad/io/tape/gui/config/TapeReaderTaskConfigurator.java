@@ -16,13 +16,18 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -50,6 +55,10 @@ public class TapeReaderTaskConfigurator extends JPanel implements SelectionListe
 
 	private FolderInputField outputDirectoryField;
 
+	private JCheckBox cleanupOutputDirectoryCheckBox;
+
+	private JSpinner programFolderNumberOffsetSpinner;
+
 	private JComponent centerComponent;
 
 	private WavePlaceholder wavePlaceholder;
@@ -69,6 +78,8 @@ public class TapeReaderTaskConfigurator extends JPanel implements SelectionListe
 		this.state = state;
 		this.audioFileField = createAudioFileField();
 		this.outputDirectoryField = createOutputDirectoryField();
+		this.cleanupOutputDirectoryCheckBox = createCleanupOutputDirectoryCheckBox();
+		this.programFolderNumberOffsetSpinner = createProgramFolderNumberOffsetSpinner();
 		this.wavePlaceholder = new WavePlaceholder(width, UIResources.audioExtendedViewHeight);
 		this.waveLoadingView = new WaveLoadingView(width, UIResources.audioExtendedViewHeight);
 		this.stateListeners = new Vector<StateListener>();
@@ -93,6 +104,7 @@ public class TapeReaderTaskConfigurator extends JPanel implements SelectionListe
 		JPanel panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(4, 4, 4, 4);
 		c.gridy = 0;
 		c.gridx = 0;
@@ -106,6 +118,17 @@ public class TapeReaderTaskConfigurator extends JPanel implements SelectionListe
 		panel.add(new JLabel("Output folder:"), c);
 		c.gridx++;
 		panel.add(getOutputDirectoryField(), c);
+		c.gridy++;
+		c.gridx = 0;
+		panel.add(new JLabel("Start index:"), c);
+		c.gridx++;
+		c.fill = GridBagConstraints.NONE;
+		panel.add(getProgramFolderNumberOffsetSpinner(), c);
+		c.gridy++;
+		c.gridx = 0;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(getCleanupOutputDirectoryCheckBox(), c);
 		panel.setBorder(BorderFactory.createTitledBorder("Files"));
 		return panel;
 	}
@@ -158,6 +181,34 @@ public class TapeReaderTaskConfigurator extends JPanel implements SelectionListe
 			}
 		});
 		return field;
+	}
+
+	private JCheckBox createCleanupOutputDirectoryCheckBox() {
+		final JCheckBox checkBox = new JCheckBox("Cleanup output folder", getState().isCleanupOutputDirectory());
+		checkBox.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				getState().setCleanupOutputDirectory(checkBox.isSelected());
+				fireStateChanged();
+			}
+		});
+		return checkBox;
+	}
+
+	private JSpinner createProgramFolderNumberOffsetSpinner() {
+		final JSpinner spinner = new JSpinner(
+				new SpinnerNumberModel(getState().getProgramFolderNumberOffset(), 1, 99, 1));
+		spinner.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				int value = ((Integer) spinner.getValue()).intValue();
+				getState().setProgramFolderNumberOffset(value);
+				fireStateChanged();
+			}
+		});
+		return spinner;
 	}
 
 	private JComponent createMetaDataComponent() {
@@ -390,6 +441,14 @@ public class TapeReaderTaskConfigurator extends JPanel implements SelectionListe
 
 	private FolderInputField getOutputDirectoryField() {
 		return outputDirectoryField;
+	}
+
+	private JCheckBox getCleanupOutputDirectoryCheckBox() {
+		return cleanupOutputDirectoryCheckBox;
+	}
+
+	private JSpinner getProgramFolderNumberOffsetSpinner() {
+		return programFolderNumberOffsetSpinner;
 	}
 
 	private JComponent getCenterComponent() {
