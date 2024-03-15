@@ -49,6 +49,8 @@ public class ProgramEditorMenuMaker extends PlainTextEditorDefaultMenuMaker impl
 
 	protected JMenu createMetadataInsertMenu(ProgramEditorActions programActions) {
 		JMenu menu = new JMenu(INSERT_MENU_LABEL);
+		menu.add(decorateForMenu(
+				createInsertTextMenuItem("Include", formatMetadatum(AMD_INCLUDE, "$.amd"), programActions)));
 		menu.add(createMetadataInsertTypeMenu(programActions));
 		menu.add(decorateForMenu(createInsertTextMenuItem("Name", formatMetadatum(AMD_NAME), programActions)));
 		menu.add(decorateForMenu(createInsertTextMenuItem("Author", formatMetadatum(AMD_AUTHOR), programActions)));
