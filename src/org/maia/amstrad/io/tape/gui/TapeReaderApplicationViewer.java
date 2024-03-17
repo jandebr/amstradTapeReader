@@ -16,7 +16,7 @@ import org.maia.swing.text.pte.model.PlainTextFileDocument;
 
 public class TapeReaderApplicationViewer extends Viewer {
 
-	private static PlainTextEditor textEditor;
+	private PlainTextEditor textEditor;
 
 	public TapeReaderApplicationViewer(TapeReaderApplicationView view) {
 		super(view, "Amstrad Tape Reader", true);
@@ -35,7 +35,7 @@ public class TapeReaderApplicationViewer extends Viewer {
 	}
 
 	public void openTaskConfigurationDialog() {
-		getApplicationView().openTaskConfigurationDialog("Read audio file");
+		getApplicationView().openTaskConfigurationDialog();
 	}
 
 	public TapeReaderTaskConfiguration getTaskConfiguration() {
@@ -46,14 +46,14 @@ public class TapeReaderApplicationViewer extends Viewer {
 		return (TapeReaderApplicationView) getView();
 	}
 
-	public static PlainTextEditor getTextEditor() {
+	public PlainTextEditor getTextEditor() {
 		if (textEditor == null) {
 			textEditor = createTextEditor();
 		}
 		return textEditor;
 	}
 
-	private static PlainTextEditor createTextEditor() {
+	private PlainTextEditor createTextEditor() {
 		PlainTextFileDocument.setFileNameExtensionFilter(
 				new FileNameExtensionFilter("Text files (*.txt, *.bas, *.amd)", "txt", "bas", "amd"));
 		// UIManager.put("TabbedPane.selected", Color.WHITE);
@@ -68,7 +68,7 @@ public class TapeReaderApplicationViewer extends Viewer {
 	private class ReadAudioFileAction extends AbstractAction {
 
 		public ReadAudioFileAction() {
-			super("Read audio file...");
+			super(UIResources.readAudioFileLabel);
 		}
 
 		@Override

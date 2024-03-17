@@ -17,6 +17,8 @@ import org.maia.amstrad.io.tape.read.AudioFile;
 
 public class UIFactory {
 
+	private static TapeReaderApplicationViewer applicationViewer;
+
 	private UIFactory() {
 	}
 
@@ -24,7 +26,9 @@ public class UIFactory {
 		File taskConfigurationFile = new File("task.ini");
 		TapeReaderApplicationView view = createApplicationView(taskConfigurationFile);
 		TapeReaderTaskConfigurationIO.applyStartupArguments(view.getTaskConfiguration(), args);
-		return new TapeReaderApplicationViewer(view);
+		TapeReaderApplicationViewer viewer = new TapeReaderApplicationViewer(view);
+		setApplicationViewer(viewer);
+		return viewer;
 	}
 
 	public static Viewer createAudioFileViewer(AudioFile audioFile, int pixelsPerSecond, boolean exitOnClose)
@@ -105,6 +109,14 @@ public class UIFactory {
 
 	public static Dimension getScreenSize() {
 		return Toolkit.getDefaultToolkit().getScreenSize();
+	}
+
+	public static TapeReaderApplicationViewer getApplicationViewer() {
+		return applicationViewer;
+	}
+
+	private static void setApplicationViewer(TapeReaderApplicationViewer viewer) {
+		applicationViewer = viewer;
 	}
 
 }

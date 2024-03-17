@@ -51,6 +51,8 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 
 	private ClearSelectionAction clearSelectionAction;
 
+	private ReadAudioFileAction readAudioFileAction;
+
 	private AmstradPcPlugin amstradPcPlugin;
 
 	private List<ToolBarListener> listeners;
@@ -65,6 +67,7 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 		this.programLoadAction = new ProgramLoadAction();
 		this.programRunAction = new ProgramRunAction();
 		this.clearSelectionAction = new ClearSelectionAction();
+		this.readAudioFileAction = new ReadAudioFileAction();
 		this.amstradPcPlugin = new AmstradPcPlugin();
 		this.listeners = new Vector<ToolBarListener>();
 		indexView.addSelectionListener(this);
@@ -73,6 +76,8 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 	}
 
 	private void buildUI() {
+		add(new ProgramButton(getReadAudioFileAction()));
+		add(Box.createHorizontalStrut(4));
 		add(new ProgramButton(getCodeInspectorAction()));
 		add(Box.createHorizontalStrut(4));
 		add(new ProgramButton(getProgramLoadAction()));
@@ -158,7 +163,7 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 	}
 
 	private PlainTextEditor getTextEditor() {
-		return TapeReaderApplicationViewer.getTextEditor();
+		return UIFactory.getApplicationViewer().getTextEditor();
 	}
 
 	public AudioTapeProgram getSelectedProgram() {
@@ -197,6 +202,10 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 		return clearSelectionAction;
 	}
 
+	private ReadAudioFileAction getReadAudioFileAction() {
+		return readAudioFileAction;
+	}
+
 	private AmstradPcPlugin getAmstradPcPlugin() {
 		return amstradPcPlugin;
 	}
@@ -233,6 +242,21 @@ public class AudioTapeIndexToolBar extends Box implements IndexSelectionListener
 
 		protected void setToolTipText(String text) {
 			putValue(Action.SHORT_DESCRIPTION, text);
+		}
+
+	}
+
+	private class ReadAudioFileAction extends ProgramAction {
+
+		public ReadAudioFileAction() {
+			super(UIResources.readAudioFileLabel, UIResources.readAudioFileIcon);
+			setToolTipText(UIResources.readAudioFileTooltip);
+			setEnabled(true);
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent event) {
+			UIFactory.getApplicationViewer().openTaskConfigurationDialog();
 		}
 
 	}

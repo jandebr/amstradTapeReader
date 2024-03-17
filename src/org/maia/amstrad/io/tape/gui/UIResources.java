@@ -67,6 +67,12 @@ public class UIResources {
 
 	public static Icon clearSelectionIcon = loadIcon(iconFolder + "unselect32.png");
 
+	public static String readAudioFileLabel = "Read audio file...";
+
+	public static String readAudioFileTooltip = "Restore Basic programs from an audio file";
+
+	public static Icon readAudioFileIcon = loadIcon(iconFolder + "tape32.png");
+
 	public static Icon metadataDocumentSmallIcon = loadIcon(iconFolder + "metadata-doc16.png");
 
 	public static Icon metadataDocumentLargeIcon = loadIcon(iconFolder + "metadata-doc32.png");

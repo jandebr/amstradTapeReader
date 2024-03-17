@@ -48,6 +48,10 @@ public class TapeReaderApplicationView extends JPanel {
 		replaceCenterComponent(getEmblemView());
 	}
 
+	public void openTaskConfigurationDialog() {
+		openTaskConfigurationDialog("Read audio file");
+	}
+
 	public void openTaskConfigurationDialog(String dialogTitle) {
 		Window window = SwingUtilities.getWindowAncestor(this);
 		TapeReaderTaskConfiguratorDialog dialog = new TapeReaderTaskConfiguratorDialog(window, dialogTitle,
@@ -97,7 +101,7 @@ public class TapeReaderApplicationView extends JPanel {
 
 	private synchronized void updateResultsViewAsync() {
 		replaceCenterComponent(getReadingView());
-		TapeReaderApplicationViewer.getTextEditor().discardAllDocuments(); // fresh editor
+		UIFactory.getApplicationViewer().getTextEditor().discardAllDocuments(); // fresh editor
 		new Thread(new Runnable() {
 
 			@Override
